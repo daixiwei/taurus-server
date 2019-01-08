@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.taurus</groupId>
+		<artifactId>taurus-server</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<packaging>jar</packaging>
+	<artifactId>taurus-permanent</artifactId>
+	<version>1.0.0</version>
+	
+	
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		
+		<!--依赖 taurus-core -->
+		<dependency>
+			<groupId>com.taurus</groupId>
+			<artifactId>taurus-core</artifactId>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>org.tanukisoftware</groupId>
+			<artifactId>wrapper</artifactId>
+			<version>3.5.37</version>
+			<scope>system</scope>
+    		<systemPath>${project.basedir}/libs/wrapper3.5.37.jar</systemPath>  
+		</dependency>
+	</dependencies>
+</project>

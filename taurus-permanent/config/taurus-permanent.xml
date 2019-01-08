@@ -1,0 +1,79 @@
+<server>
+	<!-- 计时器线程池大小-->
+	<timerThreadPoolSize>4</timerThreadPoolSize>
+	<!-- 协议包压缩门槛 （单位字节），当协议包大于设定的值则会进行压缩 -->
+	<protocolCompressionThreshold>1024</protocolCompressionThreshold>
+	<!-- 读缓冲区类型  nio  Direct Buffer  或者  Heap Buffer-->
+	<readBufferType>Heap</readBufferType>
+	<!-- 写入冲区类型  nio  Direct Buffer  或者  Heap Buffer-->
+	<writeBufferType>Heap</writeBufferType>
+	<!-- 最大的数据包大小 -->
+	<maxIncomingRequestSize>524288</maxIncomingRequestSize>
+	<!-- 最大读取缓存大小 -->
+	<maxReadBufferSize>1024</maxReadBufferSize>
+	<!-- 最大写入缓存大小 -->
+	<maxWriteBufferSize>32768</maxWriteBufferSize>
+	<!-- 会话队列的大小-->
+	<sessionPacketQueueSize>160</sessionPacketQueueSize>
+	
+	<!-- Thread Pool Size of the 3 main stages of the Bitswarm Engine -->
+	<socketAcceptorThreadPoolSize>1</socketAcceptorThreadPoolSize>
+	<socketReaderThreadPoolSize>1</socketReaderThreadPoolSize>
+	<socketWriterThreadPoolSize>3</socketWriterThreadPoolSize>
+	
+	<!-- Enable disable Nagle algorithm on sockets, true == disable -->
+	<tcpNoDelay>true</tcpNoDelay>
+	<useDebugMode>true</useDebugMode>
+	<!-- 会话最大空闲时间(单位秒)-->
+	<sessionMaxIdleTime>5</sessionMaxIdleTime>
+	<!-- 用户最大空闲时间 (单位秒)-->
+	<userMaxIdleTime>15</userMaxIdleTime>
+	<ghostHunterEnabled>true</ghostHunterEnabled>
+	
+	<!-- Bind socket addresses -->
+	<socketAddresses>
+		<socket address="0.0.0.0" port="10010" type="TCP" />
+	</socketAddresses>
+	
+	<!-- Ip addresses filter-->
+	<ipFilter>
+		<addressBlackList>
+			<string>1.2.3.4</string>
+		</addressBlackList>
+		<addressWhiteList>
+			<string>127.0.0.1</string>
+		</addressWhiteList>
+		<maxConnectionsPerAddress>10000</maxConnectionsPerAddress>
+	</ipFilter>
+		
+	<!-- Main extension class -->
+	<controllerSettings>
+		<name>extension - test </name>
+		<className>com.taurus.TestExtension</className>
+	</controllerSettings>
+
+	<!-- The system thread pool config -->
+	<systemThreadPoolConfig>
+		<name>Sys</name>
+		<coreThreads>4</coreThreads>
+		<backupThreads>16</backupThreads>
+		<maxBackups>64</maxBackups>
+		<queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
+		<secondsTriggeringBackup>50</secondsTriggeringBackup>
+		<backupThreadsExpiry>3600</backupThreadsExpiry>
+		<queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
+	</systemThreadPoolConfig>
+	
+	<!-- The extension thread pool config -->
+	<extensionThreadPoolConfig>
+		<name>Ext</name>
+		<coreThreads>4</coreThreads>
+		<backupThreads>16</backupThreads>
+		<maxBackups>64</maxBackups>
+		<queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
+		<secondsTriggeringBackup>50</secondsTriggeringBackup>
+		<backupThreadsExpiry>3600</backupThreadsExpiry>
+		<queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
+	</extensionThreadPoolConfig>
+	
+</server>

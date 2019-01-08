@@ -1,0 +1,15 @@
+/.project
+/.settings
+/taurus-core/.settings
+/taurus-core/target
+/taurus-core/.classpath
+/taurus-core/.project
+/taurus-permanent/.gitignore
+/taurus-permanent/.project
+/taurus-permanent/.settings
+/taurus-permanent/.classpath
+/taurus-web/.settings
+/taurus-web/target
+/taurus-web/.classpath
+/taurus-web/.gitignore
+/taurus-web/.project

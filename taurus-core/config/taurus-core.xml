@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<serivce-core>
+    <log4jPath>log4j.properties</log4jPath>
+    
+	<plugin>
+	    <id>database</id>
+	    <class>com.taurus.core.plugin.database.DataBasePlugin</class>
+	    
+		<poolConfig>
+		    <!-- 最大连接数, 默认8个 -->
+		    <maxActive>80</maxActive>
+		    <!-- 初始连接池大小, 默认0个 -->
+		    <initialSize>2</initialSize>
+		    <!-- 最小空闲连接数, 默认0个 -->
+		    <minIdle>5</minIdle>
+		    <!-- 配置获取连接等待超时的时间，单位是毫秒,  默认-1 -->
+		    <maxWait>-1</maxWait>
+		    <!-- 在borrow一个jedis实例时，是否提前进行alidate操作, 默认false -->
+		    <testOnBorrow>true</testOnBorrow>
+		    <!-- 在return给pool时，是否提前进行validate操作, 默认false -->
+		    <testOnReturn>true</testOnReturn>
+		    <!-- 表示有一个idle object evitor线程对idle object进行扫描，如果validate失败，
+		    	此object会被从pool中drop掉；这一项只有在timeBetweenEvictionRunsMillis大于0时才有意义, 默认true -->
+		    <testWhileIdle>true</testWhileIdle>
+		    <!--hsqldb - "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS"
+	 			Oracle - "select 1 from dual"
+	 			DB2 - "select 1 from sysibm.sysdummy1"
+	  			mysql - "select 1" -->
+		    <validationQuery>select 1</validationQuery>
+		    <!-- 配置连接在池中最小生存的时间,默认180000-->
+		    <minEvictableIdleTimeMillis>180000</minEvictableIdleTimeMillis>
+		    <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒, 默认60000 -->
+		    <timeBetweenEvictionRunsMillis>60000</timeBetweenEvictionRunsMillis>
+		    <!-- 配置发生错误时多久重连，默认300000 -->
+		    <timeBetweenConnectErrorMillis>30000</timeBetweenConnectErrorMillis>
+		    <!-- 是否打开连接泄露自动检测, 默认false -->
+		    <removeAbandoned>false</removeAbandoned>
+		    <!-- 连接长时间没有使用，被认为发生泄露时长, 默认300000 -->
+		    <removeAbandonedTimeoutMillis>300000</removeAbandonedTimeoutMillis>
+		    <!-- 发生泄露时是否需要输出 log，建议在开启连接泄露检测时开启，方便排错 -->
+		    <logAbandoned>false</logAbandoned>
+		    <!-- 只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true，使用oracle时可以设定此值。 默认 10-->
+		    <maxPoolPreparedStatementPerConnectionSize>-1</maxPoolPreparedStatementPerConnectionSize>
+		</poolConfig>
+		
+	    <databases>
+			<db>
+				<!-- <name>db1</name>
+				<driverName>com.mysql.jdbc.Driver</driverName>
+			    <connectionString>jdbc:mysql://rm-wz9k320fwmcahk83vgo.mysql.rds.aliyuncs.com:3306/db_haoyou</connectionString>
+			    <userName>root</userName>
+		    	<password>haoyou7!</password> -->
+		    	<name>db1</name>
+				<driverName>com.mysql.jdbc.Driver</driverName>
+			    <connectionString>jdbc:mysql://127.0.0.1:3306/db_haoyou</connectionString>
+			    <userName>root</userName>
+		    	<password>123456</password>
+			</db>   
+		</databases>
+	</plugin>
+
+	<plugin>
+	    <id>redis</id>
+	    <class>com.taurus.core.plugin.redis.RedisPlugin</class>
+	    
+		<poolConfig>
+		    <!-- 最大连接数, 默认8个 -->
+		    <maxTotal>80</maxTotal>
+		    <!-- 最大空闲连接数, 默认8个 -->
+		    <maxIdle>20</maxIdle>
+		    <!-- 最小空闲连接数, 默认0个 -->
+		    <minIdle>5</minIdle>
+		    <!-- 获取连接时的最大等待毫秒数(如果设置为阻塞时BlockWhenExhausted),如果超时就抛异常, 小于零:阻塞不确定的时间,  默认-1 -->
+		    <maxWaitMillis>-1</maxWaitMillis>
+		    <!-- 在borrow一个jedis实例时，是否提前进行alidate操作, 默认false -->
+		    <testOnBorrow>true</testOnBorrow>
+		    <!-- 在return给pool时，是否提前进行validate操作, 默认false -->
+		    <testOnReturn>true</testOnReturn>
+		    <!-- 表示有一个idle object evitor线程对idle object进行扫描，如果validate失败，
+		    	此object会被从pool中drop掉；这一项只有在timeBetweenEvictionRunsMillis大于0时才有意义, 默认true -->
+		    <testWhileIdle>true</testWhileIdle>
+		    <!-- 表示idle object evitor每次扫描的最多的对象数, 默认-1 -->
+		    <numTestsPerEvictionRun>100</numTestsPerEvictionRun>
+		    <!-- 表示一个对象至少停留在idle状态的最短时间，然后才能被idle object evitor扫描并驱逐；
+		    	这一项只有在timeBetweenEvictionRunsMillis大于0时才有意义 , 默认60000-->
+		    <minEvictableIdleTimeMillis>60000</minEvictableIdleTimeMillis>
+		    <!-- 逐出扫描的时间间隔(毫秒) 如果为负数,则不运行逐出线程, 默认30000 -->
+		    <timeBetweenEvictionRunsMillis>30000</timeBetweenEvictionRunsMillis>
+		    <!-- 在minEvictableIdleTimeMillis基础上，加入了至少minIdle个对象已经在pool里面了。
+		    	如果为-1，evicted不会根据idle time驱逐任何对象。如果minEvictableIdleTimeMillisd大于0，
+		    	则此项设置无意义，且只有在timeBetweenEvictionRunsMillis大于0时才有意义，默认1800000 -->
+		    <softMinEvictableIdleTimeMillis>1800000</softMinEvictableIdleTimeMillis>
+		    <!-- 连接耗尽时是否阻塞, false报异常,ture阻塞直到超时, 默认true -->
+		    <blockWhenExhausted>true</blockWhenExhausted>
+		</poolConfig>
+		
+		<infos>
+			<info name="group1_db0" host="127.0.0.1" password="123456" port="6379" database="0" />
+			<info name="group1_db1" host="127.0.0.1" password="123456" port="6379" database="1" />
+			<info name="group1_db2" host="127.0.0.1" password="123456" port="6379" database="2" />
+		</infos>
+	</plugin>  
+</serivce-core>
