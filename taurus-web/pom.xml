@@ -55,7 +55,6 @@
 		    <groupId>com.jfinal</groupId>
 		    <artifactId>jfinal-undertow</artifactId>
 		    <version>1.4</version>
-		    <scope>provided</scope>
 		</dependency>
 	</dependencies>
 	
