@@ -13,14 +13,14 @@ import com.taurus.core.util.Logger;
 import com.taurus.core.util.executor.ExecutorConfig;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.core.util.task.TaskScheduler;
-import com.taurus.permanent.bitswarm.core.BitSwarmEngine;
-import com.taurus.permanent.bitswarm.sessions.Session;
-import com.taurus.permanent.bitswarm.sessions.SessionManager;
+import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.DefaultConstants;
 import com.taurus.permanent.core.IController;
 import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.ServerState;
 import com.taurus.permanent.core.TPEvents;
+import com.taurus.permanent.data.Session;
+import com.taurus.permanent.data.SessionManager;
 import com.taurus.permanent.util.GhostUserHunter;
 
 /**

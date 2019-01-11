@@ -1,10 +1,8 @@
-package com.taurus.permanent.bitswarm.data;
+package com.taurus.permanent.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import com.taurus.permanent.bitswarm.sessions.Session;
 
 /**
  * Packet data object
@@ -14,11 +12,13 @@ public class Packet {
 	protected int							id;
 	protected Object						data;
 	protected Session						sender;
-	protected int							originalSize	= -1;
+//	protected int							originalSize	= -1;
 	protected Collection<Session>			recipients;
 	protected byte[]						fragmentBuffer;
+	protected PackDataType					dataType = PackDataType.BINARY;
 	
 	
+
 	public int getId() {
 		return id;
 	}
@@ -61,14 +61,14 @@ public class Packet {
 		return this.fragmentBuffer != null;
 	}
 	
-	public int getOriginalSize() {
-		return this.originalSize;
-	}
-	
-	public void setOriginalSize(int originalSize) {
-		if (this.originalSize == -1)
-			this.originalSize = originalSize;
-	}
+//	public int getOriginalSize() {
+//		return this.originalSize;
+//	}
+//	
+//	public void setOriginalSize(int originalSize) {
+//		if (this.originalSize == -1)
+//			this.originalSize = originalSize;
+//	}
 	
 	public byte[] getFragmentBuffer() {
 		return this.fragmentBuffer;
@@ -78,6 +78,14 @@ public class Packet {
 		this.fragmentBuffer = bb;
 	}
 	
+	public PackDataType getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(PackDataType dataType) {
+		this.dataType = dataType;
+	}
+	
 	public String toString() {
 		return String.format("{ data: %s }",  data.getClass().getName());
 	}
@@ -85,9 +93,13 @@ public class Packet {
 	public Packet clone() {
 		Packet newPacket = new Packet();
 		newPacket.setData(getData());
-		newPacket.setOriginalSize(getOriginalSize());
-		newPacket.setRecipients(null);
-		newPacket.setSender(getSender());
+//		newPacket.setOriginalSize(getOriginalSize());
+		List<Session> recipients = new ArrayList<Session>();
+		recipients.addAll(this.recipients);
+		newPacket.recipients = recipients;
+		newPacket.sender = this.sender;
+		newPacket.dataType = this.dataType;
+		newPacket.fragmentBuffer = this.fragmentBuffer;
 		return newPacket;
 	}
 }

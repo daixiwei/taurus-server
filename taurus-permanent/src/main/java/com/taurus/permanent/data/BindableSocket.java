@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.data;
+package com.taurus.permanent.data;
 
 import java.nio.channels.SelectableChannel;
 

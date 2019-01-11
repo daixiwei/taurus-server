@@ -45,7 +45,11 @@
 		</addressWhiteList>
 		<maxConnectionsPerAddress>10000</maxConnectionsPerAddress>
 	</ipFilter>
-		
+	
+	<webServer>
+	    <isActive>true</isActive>
+	</webServer>
+	
 	<!-- Main extension class -->
 	<controllerSettings>
 		<name>extension - test </name>

@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.sessions;
+package com.taurus.permanent.data;
 
 /**
  * session 类型

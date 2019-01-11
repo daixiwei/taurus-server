@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.core;
+package com.taurus.permanent.normal;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,22 +16,24 @@ import java.util.concurrent.Executors;
 
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
-import com.taurus.permanent.bitswarm.io.IOHandler;
-import com.taurus.permanent.bitswarm.sessions.Session;
-import com.taurus.permanent.bitswarm.sessions.SessionManager;
+import com.taurus.permanent.core.BaseCoreService;
+import com.taurus.permanent.core.BitSwarmEngine;
+import com.taurus.permanent.data.Session;
+import com.taurus.permanent.data.SessionManager;
+import com.taurus.permanent.io.IOHandler;
 
 /**
  * SocketReader
  * @author daixiwei daixiwei15@126.com
  */
-public class SocketReader extends BaseCoreService implements ISocketReader, Runnable {
+public class SocketReader extends BaseCoreService implements Runnable {
 	private final BitSwarmEngine	engine;
 	private final Logger			logger;
 	private int						threadPoolSize	= 1;
 	private final ExecutorService	threadPool;
 	private SessionManager			sessionManager;
-	private ISocketAcceptor			socketAcceptor;
-	private ISocketWriter			socketWriter;
+	private SocketAcceptor			socketAcceptor;
+	private SocketWriter			socketWriter;
 	private Selector				readSelector;
 	private IOHandler				ioHandler;
 	private volatile boolean		isActive		= false;
@@ -183,9 +185,8 @@ public class SocketReader extends BaseCoreService implements ISocketReader, Runn
 	
 	private void closeConnection(SelectableChannel channel) throws IOException {
 		channel.close();
-		
-		if ((channel instanceof SocketChannel))
-			sessionManager.onSocketDisconnected((SocketChannel) channel);
+		if (channel instanceof SocketChannel)
+			sessionManager.onSocketDisconnected(channel);
 	}
 	
 	public IOHandler getIOHandler() {

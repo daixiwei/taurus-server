@@ -2,9 +2,9 @@ package com.taurus;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.events.IEvent;
-import com.taurus.permanent.bitswarm.sessions.Session;
 import com.taurus.permanent.core.IController;
 import com.taurus.permanent.core.TPEvents;
+import com.taurus.permanent.data.Session;
 
 /**   
  * @author daixiwei daixiwei15@126.com 

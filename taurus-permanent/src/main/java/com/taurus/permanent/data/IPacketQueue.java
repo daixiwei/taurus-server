@@ -1,6 +1,4 @@
-package com.taurus.permanent.bitswarm.sessions;
-
-import com.taurus.permanent.bitswarm.data.Packet;
+package com.taurus.permanent.data;
 
 /**
  * 网络包队列接口

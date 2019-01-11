@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.io;
+package com.taurus.permanent.io;
 
 import java.nio.ByteBuffer;
 
@@ -8,17 +8,17 @@ import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
-import com.taurus.permanent.bitswarm.core.BitSwarmEngine;
-import com.taurus.permanent.bitswarm.data.Packet;
-import com.taurus.permanent.bitswarm.sessions.Session;
+import com.taurus.permanent.core.BitSwarmEngine;
+import com.taurus.permanent.data.PackDataType;
+import com.taurus.permanent.data.Packet;
+import com.taurus.permanent.data.Session;
 
 /**
  * 协议包字节流解析
  * @author daixiwei daixiwei15@126.com
  */
 public class BinaryIoHandler {
-	private static final String		ACTION_ID				= "a";
-	private static final String		PARAM_ID				= "p";
+
 	private static final int		INT_SIZE				= 4;
 	private final Logger			log;
 	private final BitSwarmEngine	engine;
@@ -43,16 +43,7 @@ public class BinaryIoHandler {
 	}
 
 	public void handleWrite(Packet packet) throws Exception {
-		ITObject params = TObject.newInstance();
-		params.putByte(ACTION_ID, (byte) packet.getId());
-		params.putTObject(PARAM_ID, (ITObject) packet.getData());
-
-		byte[] binData = params.toBinary();
-
-		ByteBuffer packetBuffer = ByteBuffer.allocate(INT_SIZE + binData.length);
-		packetBuffer.putInt(binData.length);
-		packetBuffer.put(binData);
-		packet.setData(packetBuffer.array());
+		engine.getProtocolHandler().onPacketWrite(packet);
 		engine.getSocketWriter().enqueuePacket(packet);
 	}
 
@@ -191,31 +182,6 @@ public class BinaryIoHandler {
 		return new ProcessedPacket(state, data);
 	}
 
-	private void onPacketRead(Session session,ByteBuffer dataBuffer) {
-		Packet newPacket = new Packet();
-		newPacket.setSender(session);
-		newPacket.setOriginalSize(dataBuffer.capacity());
-		ITObject requestObject = null;
-		try {
-			requestObject = TObject.newFromBinaryData(dataBuffer.array());
-		} catch (Exception e) {
-			throw new RuntimeException("Error deserializing request: " + e);
-		}
-
-		if (requestObject != null) {
-			if (requestObject.isNull(ACTION_ID)) {
-				throw new IllegalStateException("Request rejected: No Action ID in request!");
-			}
-			if (requestObject.isNull(PARAM_ID)) {
-				throw new IllegalStateException("Request rejected: Missing parameters field!");
-			}
-
-			newPacket.setId(requestObject.getByte(ACTION_ID));
-			newPacket.setData(requestObject.getTObject(PARAM_ID));
-		}
-
-		TaurusPermanent.getInstance().getController().enqueueRequest(newPacket);
-	}
 	
 	private ProcessedPacket dispatchRequest(Session session, byte[] data) {
 		PacketReadState state = PacketReadState.WAIT_DATA;
@@ -234,10 +200,16 @@ public class BinaryIoHandler {
 			}
 			this.packetsRead += 1L;
 			state = PacketReadState.WAIT_NEW_PACKET;
+			
+			Packet newPacket = new Packet();
+			newPacket.setSender(session);
+//			newPacket.setOriginalSize(dataBuffer.capacity());
+			newPacket.setData(dataBuffer);
+			
 			this.systemTreadPool.execute(new Runnable() {
 				@Override
 				public void run() {
-					onPacketRead(session,dataBuffer);
+					engine.getProtocolHandler().onPacketRead(newPacket);
 				}
 			});
 		} else {

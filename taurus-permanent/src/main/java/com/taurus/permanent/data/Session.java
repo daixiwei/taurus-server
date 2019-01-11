@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.sessions;
+package com.taurus.permanent.data;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -22,7 +22,7 @@ public final class Session {
 	private volatile long			readBytes			= 0L;
 	private volatile long			writtenBytes		= 0L;
 	private volatile int			droppedMessages		= 0;
-	private SocketChannel			connection;
+	private ISocketChannel			connection;
 	private volatile long			creationTime;
 	private volatile long			lastReadTime;
 	private volatile long			lastWriteTime;
@@ -76,7 +76,7 @@ public final class Session {
 	 * 获取channe连接对象
 	 * @return
 	 */
-	public SocketChannel getConnection() {
+	public ISocketChannel getConnection() {
 		return this.connection;
 	}
 
@@ -342,7 +342,7 @@ public final class Session {
 	 * 设置channel连接对象
 	 * @param connection
 	 */
-	public void setConnection(SocketChannel connection) {
+	public void setConnection(ISocketChannel connection) {
 		if (connection == null) {
 			return;
 		}
@@ -350,28 +350,30 @@ public final class Session {
 		if (this.connection != null) {
 			throw new IllegalArgumentException("You cannot overwrite the connection linked to a Session!");
 		}
-		setSocketConnection(connection);
-
-	}
-
-	private void setSocketConnection(SocketChannel connection) {
-		this.connection = connection;
-		this.serverPort = connection.socket().getLocalPort();
-		this.serverAddress = connection.socket().getLocalAddress().toString().substring(1);
-
-		if ((connection != null) && (connection.socket() != null) && (!connection.socket().isClosed())) {
-			String hostAddr = connection.socket().getRemoteSocketAddress().toString().substring(1);
-			String[] adr = hostAddr.split("\\:");
-			this.clientIpAddress = adr[0];
-			try {
-				this.clientPort = Integer.parseInt(adr[1]);
-			} catch (NumberFormatException localNumberFormatException) {
-			}
+		if(connection.checkConnection()) {
 			this.connected = true;
-		} else {
-			this.clientIpAddress = "[unknown]";
+			this.connection = connection;
 		}
 	}
+
+//	private void setSocketConnection(ISocketChannel connection) {
+//		this.connection = connection;
+//		this.serverPort = connection.socket().getLocalPort();
+//		this.serverAddress = connection.socket().getLocalAddress().toString().substring(1);
+//
+//		if ((connection != null) && (connection.socket() != null) && (!connection.socket().isClosed())) {
+//			String hostAddr = connection.socket().getRemoteSocketAddress().toString().substring(1);
+//			String[] adr = hostAddr.split("\\:");
+//			this.clientIpAddress = adr[0];
+//			try {
+//				this.clientPort = Integer.parseInt(adr[1]);
+//			} catch (NumberFormatException localNumberFormatException) {
+//			}
+//			this.connected = true;
+//		} else {
+//			this.clientIpAddress = "[unknown]";
+//		}
+//	}
 
 	/**
 	 * 设置网络包队列
@@ -493,17 +495,20 @@ public final class Session {
 		this.packetQueue = null;
 		this.frozen = true;
 		try {
-			if ((type == SessionType.NORMAL) && (connection != null)) {
-				Socket socket = connection.socket();
-
-				if ((socket != null) && (!socket.isClosed())) {
-					socket.shutdownInput();
-					socket.shutdownOutput();
-					socket.close();
-					connection.close();
-				}
-
-			} else if (type == SessionType.WEBSOCKET) {
+//			if ((type == SessionType.NORMAL) && (connection != null)) {
+//				Socket socket = connection.socket();
+//
+//				if ((socket != null) && (!socket.isClosed())) {
+//					socket.shutdownInput();
+//					socket.shutdownOutput();
+//					socket.close();
+//					connection.close();
+//				}
+//
+//			} else if (type == SessionType.WEBSOCKET) {
+//			}
+			if(connection!=null) {
+				connection.close();
 			}
 
 		} finally {

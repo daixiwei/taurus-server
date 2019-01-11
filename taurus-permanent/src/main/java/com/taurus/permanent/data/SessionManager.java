@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.sessions;
+package com.taurus.permanent.data;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
@@ -15,7 +15,7 @@ import com.taurus.core.util.task.ITaskHandler;
 import com.taurus.core.util.task.TaskScheduler;
 import com.taurus.core.util.task.Task;
 import com.taurus.permanent.TaurusPermanent;
-import com.taurus.permanent.bitswarm.core.BitSwarmEngine;
+import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.TPEvents;
 
 /**
@@ -30,7 +30,7 @@ public final class SessionManager extends AbstractService {
 	private final ConcurrentMap<Integer, Session>		sessionsById;
 	private BitSwarmEngine								engine								= null;
 	private final List<Session>							sessionList;
-	private final ConcurrentMap<SocketChannel, Session>	sessionsByConnection;
+	private final ConcurrentMap<Object, Session>		sessionsByConnection;
 	private Task										sessionCleanTask;
 	private TaskScheduler								systemScheduler;
 	private int											highestCCS							= 0;
@@ -45,7 +45,7 @@ public final class SessionManager extends AbstractService {
 	private SessionManager() {
 		sessionsById = new ConcurrentHashMap<Integer, Session>();
 		sessionList = new ArrayList<Session>();
-		sessionsByConnection = new ConcurrentHashMap<SocketChannel, Session>();
+		sessionsByConnection = new ConcurrentHashMap<Object, Session>();
 	}
 
 	public void init(Object o) {
@@ -77,9 +77,8 @@ public final class SessionManager extends AbstractService {
 			sessionList.add(session);
 		}
 		sessionsById.put(session.getId(), session);
-		if (session.getType() == SessionType.NORMAL) {
-			sessionsByConnection.put(session.getConnection(), session);
-		}
+		sessionsByConnection.put(session.getConnection().getChannel(), session);
+		
 
 		if (sessionList.size() > highestCCS) {
 			highestCCS = sessionList.size();
@@ -106,7 +105,7 @@ public final class SessionManager extends AbstractService {
 		synchronized (sessionList) {
 			sessionList.remove(session);
 		}
-		SocketChannel connection = session.getConnection();
+		ISocketChannel connection = session.getConnection();
 		sessionsById.remove(session.getId());
 		if (connection != null) {
 			sessionsByConnection.remove(connection);
@@ -136,7 +135,7 @@ public final class SessionManager extends AbstractService {
 	 * @param connection
 	 * @return
 	 */
-	public Session removeSession(SocketChannel connection) {
+	public Session removeSession(Object connection) {
 		Session session = getSessionByConnection(connection);
 		if (session != null) {
 			removeSession(session);
@@ -149,8 +148,8 @@ public final class SessionManager extends AbstractService {
 	 * @param connection
 	 * @throws IOException
 	 */
-	public void onSocketDisconnected(SocketChannel connection) throws IOException {
-		Session session = (Session) sessionsByConnection.get(connection);
+	public void onSocketDisconnected(Object connection) throws IOException {
+		Session session = sessionsByConnection.get(connection);
 		if (session == null) {
 			return;
 		}
@@ -179,8 +178,8 @@ public final class SessionManager extends AbstractService {
 	 * @param connection
 	 * @return
 	 */
-	public Session getSessionByConnection(SocketChannel connection) {
-		return (Session) sessionsByConnection.get(connection);
+	public Session getSessionByConnection(Object connection) {
+		return sessionsByConnection.get(connection);
 	}
 
 	/**
@@ -189,7 +188,7 @@ public final class SessionManager extends AbstractService {
 	 * @return
 	 */
 	public Session getSessionById(int id) {
-		return (Session) sessionsById.get(Integer.valueOf(id));
+		return sessionsById.get(Integer.valueOf(id));
 	}
 
 	/**
@@ -218,16 +217,15 @@ public final class SessionManager extends AbstractService {
 	}
 
 	/**
-	 * 创建session
-	 * @param connection
+	 * 创建 session
+	 * @param channel
 	 * @return
 	 */
-	public Session createSession(SocketChannel connection) {
+	public Session createSession(ISocketChannel channel,SessionType type) {
 		Session session = new Session();
-		session.setConnection(connection);
+		session.setConnection(channel);
 		session.setMaxIdleTime(engine.getConfig().sessionMaxIdleTime);
-		session.setType(SessionType.NORMAL);
-
+		session.setType(type);
 		IPacketQueue packetQueue = new NonBlockingPacketQueue(engine.getConfig().sessionPacketQueueSize);
 		session.setPacketQueue(packetQueue);
 		return session;
@@ -272,16 +270,17 @@ public final class SessionManager extends AbstractService {
 
 	private void terminateSession(Session session) {
 		if (session.getType() == SessionType.NORMAL) {
-			SocketChannel connection = session.getConnection();
+			ISocketChannel connection = session.getConnection();
 
 			try {
-				if (connection.socket() != null) {
-					connection.socket().shutdownInput();
-					connection.socket().shutdownOutput();
-					connection.close();
-				}
+				connection.close();
+//				if (connection.socket() != null) {
+//					connection.socket().shutdownInput();
+//					connection.socket().shutdownOutput();
+//					connection.close();
+//				}
 				session.setConnected(false);
-			} catch (IOException err) {
+			} catch (Exception err) {
 				this.logger.warn("Failed closing connection while removing idle Session: " + session);
 			}
 		}

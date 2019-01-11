@@ -1,8 +1,8 @@
-package com.taurus.permanent.bitswarm.io;
+package com.taurus.permanent.io;
 
 import com.taurus.core.util.Logger;
-import com.taurus.permanent.bitswarm.data.Packet;
-import com.taurus.permanent.bitswarm.sessions.Session;
+import com.taurus.permanent.data.Packet;
+import com.taurus.permanent.data.Session;
 
 /**
  * 读写网络字节流

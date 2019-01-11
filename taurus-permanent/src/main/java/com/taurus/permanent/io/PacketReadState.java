@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.io;
+package com.taurus.permanent.io;
 
 /**
  * PacketReadState

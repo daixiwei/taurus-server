@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.core;
+package com.taurus.permanent.normal;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,20 +15,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
 import com.taurus.permanent.TaurusPermanent;
-import com.taurus.permanent.bitswarm.data.Packet;
-import com.taurus.permanent.bitswarm.io.IOHandler;
-import com.taurus.permanent.bitswarm.sessions.IPacketQueue;
-import com.taurus.permanent.bitswarm.sessions.Session;
-import com.taurus.permanent.bitswarm.sessions.SessionType;
+import com.taurus.permanent.core.BaseCoreService;
+import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.DefaultConstants;
 import com.taurus.permanent.core.ServerConfig;
+import com.taurus.permanent.data.IPacketQueue;
+import com.taurus.permanent.data.ISocketChannel;
+import com.taurus.permanent.data.Packet;
+import com.taurus.permanent.data.Session;
+import com.taurus.permanent.data.SessionType;
+import com.taurus.permanent.io.IOHandler;
 
 /**
  * SocketWriter
  * @author daixiwei
  *
  */
-public final class SocketWriter extends BaseCoreService implements ISocketWriter, Runnable {
+public final class SocketWriter extends BaseCoreService implements Runnable {
 	private BitSwarmEngine					engine;
 	private IOHandler						ioHandler;
 	private final Logger					logger;
@@ -165,7 +168,7 @@ public final class SocketWriter extends BaseCoreService implements ISocketWriter
 	}
 	
 	private void tcpSend(ByteBuffer writeBuffer, IPacketQueue sessionQ, Session session, Packet packet) throws Exception {
-		SocketChannel channel = session.getConnection();
+		ISocketChannel channel = session.getConnection();
 		if (channel == null) {
 			logger.debug("Skipping packet, found null socket for Session: " + session);
 			return;

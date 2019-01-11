@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.core;
+package com.taurus.permanent.core;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,32 +13,40 @@ import com.taurus.core.util.Logger;
  * ip连接过滤
  * @author daixiwei daixiwei15@126.com
  */
-public class DefaultConnectionFilter implements IConnectionFilter {
+public class ConnectionFilter {
 	private final Set<String>							addressWhiteList;
 	private final Set<String>							bannedAddresses;
 	private final ConcurrentMap<String, AtomicInteger>	addressMap;
 	private int											maxConnectionsPerIp = 10;
 	private Logger 										logger;
 	
-	public DefaultConnectionFilter() {
+	public ConnectionFilter() {
 		this.addressWhiteList = new HashSet<String>();
 		this.bannedAddresses = new HashSet<String>();
 		this.addressMap = new ConcurrentHashMap<String, AtomicInteger>();
-		logger = Logger.getLogger(IConnectionFilter.class);
+		logger = Logger.getLogger(ConnectionFilter.class);
 	}
-	
+	/**
+	 * 获取所有黑名单列表
+	 */
 	public void addBannedAddress(String ipAddress) {
 		synchronized (bannedAddresses) {
 			bannedAddresses.add(ipAddress);
 		}
 	}
 	
+	/**
+	 * 获取所有白名单列表
+	 */
 	public void addWhiteListAddress(String ipAddress) {
 		synchronized (this.addressWhiteList) {
 			this.addressWhiteList.add(ipAddress);
 		}
 	}
 	
+	/**
+	 * 获取所有黑名单列表
+	 */
 	public String[] getBannedAddresses() {
 		String[] set = (String[]) null;
 		
@@ -50,10 +58,16 @@ public class DefaultConnectionFilter implements IConnectionFilter {
 		return set;
 	}
 	
+	/**
+	 * 获取每个IP最大的连接数
+	 */
 	public int getMaxConnectionsPerIp() {
 		return this.maxConnectionsPerIp;
 	}
-	
+
+	/**
+	 * 获取白名单列表
+	 */
 	public String[] getWhiteListAddresses() {
 		String[] set = (String[]) null;
 		
@@ -78,18 +92,27 @@ public class DefaultConnectionFilter implements IConnectionFilter {
 		}
 	}
 	
+	/**
+	 * 移除黑名单IP地址
+	 */
 	public void removeBannedAddress(String ipAddress) {
 		synchronized (this.bannedAddresses) {
 			this.bannedAddresses.remove(ipAddress);
 		}
 	}
 	
+	/**
+	 * 移除白名单IP地址
+	 */
 	public void removeWhiteListAddress(String ipAddress) {
 		synchronized (this.addressWhiteList) {
 			this.addressWhiteList.remove(ipAddress);
 		}
 	}
 	
+	/**
+	 * 获取每个IP最大连接数
+	 */
 	public void setMaxConnectionsPerIp(int max) {
 		this.maxConnectionsPerIp = max;
 	}

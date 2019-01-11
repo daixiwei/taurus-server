@@ -1,6 +1,7 @@
-package com.taurus.permanent.bitswarm.core;
+package com.taurus.permanent.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,14 +12,18 @@ import com.taurus.core.events.IEventListener;
 import com.taurus.core.service.IService;
 import com.taurus.core.util.Logger;
 import com.taurus.permanent.TaurusPermanent;
-import com.taurus.permanent.bitswarm.data.BindableSocket;
-import com.taurus.permanent.bitswarm.data.Packet;
-import com.taurus.permanent.bitswarm.io.IOHandler;
-import com.taurus.permanent.bitswarm.sessions.SessionManager;
-import com.taurus.permanent.core.DefaultConstants;
-import com.taurus.permanent.core.TPEvents;
-import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.ServerConfig.SocketAddress;
+import com.taurus.permanent.data.BindableSocket;
+import com.taurus.permanent.data.Packet;
+import com.taurus.permanent.data.Session;
+import com.taurus.permanent.data.SessionManager;
+import com.taurus.permanent.data.SessionType;
+import com.taurus.permanent.io.IOHandler;
+import com.taurus.permanent.io.ProtocolHandler;
+import com.taurus.permanent.normal.SocketAcceptor;
+import com.taurus.permanent.normal.SocketReader;
+import com.taurus.permanent.normal.SocketWriter;
+import com.taurus.permanent.webscoket.WebSocketService;
 
 /**
  * 核心网络字节群处理类
@@ -26,9 +31,9 @@ import com.taurus.permanent.core.ServerConfig.SocketAddress;
  */
 public final class BitSwarmEngine extends BaseCoreService {
 	private static BitSwarmEngine		__engine__;
-	private ISocketAcceptor				socketAcceptor;
-	private ISocketReader				socketReader;
-	private ISocketWriter				socketWriter;
+	private SocketAcceptor				socketAcceptor;
+	private SocketReader				socketReader;
+	private SocketWriter				socketWriter;
 	
 	private Logger						logger;
 	private ServerConfig				config;
@@ -37,6 +42,8 @@ public final class BitSwarmEngine extends BaseCoreService {
 	private Map<String, IService>		coreServicesByName;
 	private Map<IService, Object>		configByService;
 	private IEventListener				eventHandler;
+	private WebSocketService			webSocketService;
+	private ProtocolHandler				protocolHandler;
 	
 	public static BitSwarmEngine getInstance() {
 		if (__engine__ == null) {
@@ -68,6 +75,9 @@ public final class BitSwarmEngine extends BaseCoreService {
 				dispatchEvent(event);
 			}
 		};
+		
+		protocolHandler = new ProtocolHandler();
+		
 		coreServicesByName = new ConcurrentHashMap<String, IService>();
 		configByService = new HashMap<IService, Object>();
 		
@@ -92,11 +102,36 @@ public final class BitSwarmEngine extends BaseCoreService {
 	
 	
 	public void write(Packet response) {
-		writeToSocket(response);
+		try {
+			if (this.config.webServerConfig.isActive) {
+	            final List<Session> webSocketRecipients = new ArrayList<Session>();
+	            final List<Session> socketRecipients = new ArrayList<Session>();
+	            for (final Session session : response.getRecipients()) {
+	                if (session.getType() == SessionType.WEBSOCKET) {
+	                    webSocketRecipients.add(session);
+	                }
+	                else {
+	                    socketRecipients.add(session);
+	                }
+	            }
+	            if (webSocketRecipients.size() > 0) {
+	                response.setRecipients(socketRecipients);
+	                final Packet webSocketResponse = response.clone();
+	                webSocketResponse.setRecipients(webSocketRecipients);
+	                this.writeToWebSocket(webSocketResponse);
+	            }
+	        }
+		}finally {
+			writeToSocket(response);
+		}
 	}
 	
 	private void writeToSocket(Packet res) {
 		socketWriter.getIOHandler().onDataWrite(res);
+	}
+	
+	private void writeToWebSocket(Packet res) {
+		webSocketService.onDataWrite(res);
 	}
 	
 
@@ -113,29 +148,32 @@ public final class BitSwarmEngine extends BaseCoreService {
 		// instance socket writer
 		socketWriter = new SocketWriter(config.socketWriterThreadPoolSize);
 		socketWriter.setIOHandler(ioHandler);
-
+		
 		sessionManager.setName(DefaultConstants.SERVICE_SESSION_MANAGER);
 		
-		((BaseCoreService) socketAcceptor).setName(DefaultConstants.SERVICE_SOCKET_ACCEPTOR);
-		((BaseCoreService) socketReader).setName(DefaultConstants.SERVICE_SOCKET_READER);
-		((BaseCoreService) socketWriter).setName(DefaultConstants.SERVICE_SOCKET_WRITER);
+		webSocketService = new WebSocketService();
+		
+		socketAcceptor.setName(DefaultConstants.SERVICE_SOCKET_ACCEPTOR);
+		socketReader.setName(DefaultConstants.SERVICE_SOCKET_READER);
+		socketWriter.setName(DefaultConstants.SERVICE_SOCKET_WRITER);
+		webSocketService.setName(DefaultConstants.SERVICE_WEB_SOCKET);
 		
 		coreServicesByName.put(DefaultConstants.SERVICE_SESSION_MANAGER, sessionManager);
 		
-		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_ACCEPTOR, (IService) socketAcceptor);
-		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_READER, (IService) socketReader);
-		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_WRITER, (IService) socketWriter);
+		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_ACCEPTOR, socketAcceptor);
+		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_READER, socketReader);
+		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_WRITER, socketWriter);
+		coreServicesByName.put(DefaultConstants.SERVICE_WEB_SOCKET, webSocketService);
 	}
 	
 	private void stopCoreServices() throws Exception {
-		((IService) socketWriter).destroy(null);
-		((IService) socketReader).destroy(null);
-		
+		socketWriter.destroy(null);
+		socketReader.destroy(null);
+		webSocketService.destroy(null);
 		Thread.sleep(2000L);
-		
-		
+
 		sessionManager.destroy(null);
-		((IService) socketAcceptor).destroy(null);
+		socketAcceptor.destroy(null);
 	}
 	
 	private void bindSockets(List<SocketAddress> bindableSockets) {
@@ -170,16 +208,20 @@ public final class BitSwarmEngine extends BaseCoreService {
 		return coreServicesByName.get(serviceName);
 	}
 	
-	public ISocketAcceptor getSocketAcceptor() {
+	public SocketAcceptor getSocketAcceptor() {
 		return this.socketAcceptor;
 	}
 	
-	public ISocketReader getSocketReader() {
+	public SocketReader getSocketReader() {
 		return this.socketReader;
 	}
 	
-	public ISocketWriter getSocketWriter() {
+	public SocketWriter getSocketWriter() {
 		return this.socketWriter;
+	}
+	
+	public ProtocolHandler getProtocolHandler() {
+		return this.protocolHandler;
 	}
 	
 	public Logger getLogger() {

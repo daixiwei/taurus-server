@@ -1,8 +1,6 @@
-package com.taurus.permanent.bitswarm.sessions;
+package com.taurus.permanent.data;
 
 import java.util.LinkedList;
-
-import com.taurus.permanent.bitswarm.data.Packet;
 
 /**
  * 非阻塞网络包队列

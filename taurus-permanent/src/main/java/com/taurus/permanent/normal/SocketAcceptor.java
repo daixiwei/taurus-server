@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.core;
+package com.taurus.permanent.normal;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -15,17 +15,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.taurus.core.util.Logger;
-import com.taurus.permanent.bitswarm.data.BindableSocket;
-import com.taurus.permanent.bitswarm.sessions.Session;
-import com.taurus.permanent.bitswarm.sessions.SessionManager;
+import com.taurus.permanent.core.BaseCoreService;
+import com.taurus.permanent.core.BitSwarmEngine;
+import com.taurus.permanent.core.ConnectionFilter;
 import com.taurus.permanent.core.DefaultConstants;
+import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.ServerConfig.SocketAddress;
+import com.taurus.permanent.data.BindableSocket;
+import com.taurus.permanent.data.Session;
+import com.taurus.permanent.data.SessionManager;
+import com.taurus.permanent.data.SessionType;
 
 /**
  * SocketAcceptor
  * @author daixiwei daixiwei15@126.com
  */
-public class SocketAcceptor extends BaseCoreService implements ISocketAcceptor, Runnable {
+public class SocketAcceptor extends BaseCoreService implements  Runnable {
 	private final BitSwarmEngine	engine;
 	private final Logger			logger;
 	private volatile int			threadId		= 1;
@@ -33,9 +38,9 @@ public class SocketAcceptor extends BaseCoreService implements ISocketAcceptor, 
 	private final ExecutorService	threadPool;
 	private List<SocketChannel>		acceptableConnections;
 	private List<BindableSocket>	boundSockets;
-	private IConnectionFilter		connectionFilter;
+	private ConnectionFilter		connectionFilter;
 	private SessionManager			sessionManager;
-	private ISocketReader			socketReader;
+	private SocketReader			socketReader;
 	private Selector				acceptSelector;
 	private volatile boolean		isActive		= false;
 	
@@ -55,7 +60,7 @@ public class SocketAcceptor extends BaseCoreService implements ISocketAcceptor, 
 		boundSockets = new ArrayList<BindableSocket>();
 		socketReader = engine.getSocketReader();
 		
-		connectionFilter = new DefaultConnectionFilter();
+		connectionFilter = new ConnectionFilter();
 		try {
 			acceptSelector = Selector.open();
 			logger.info("AcceptSelector opened");
@@ -174,7 +179,7 @@ public class SocketAcceptor extends BaseCoreService implements ISocketAcceptor, 
 					connection.socket().setTcpNoDelay(engine.getConfig().tcpNoDelay);
 					
 					SelectionKey selectionKey = connection.register(socketReader.getSelector(), 1);
-					Session session = sessionManager.createSession(connection);
+					Session session = sessionManager.createSession(new NormalSocketChannel(connection),SessionType.NORMAL);
 					session.setSystemProperty(DefaultConstants.SESSION_SELECTION_KEY, selectionKey);
 					sessionManager.addSession(session);
 				}catch (IOException e) {
@@ -206,15 +211,8 @@ public class SocketAcceptor extends BaseCoreService implements ISocketAcceptor, 
 		return list;
 	}
 	
-	public IConnectionFilter getConnectionFilter() {
+	public ConnectionFilter getConnectionFilter() {
 		return connectionFilter;
-	}
-	
-	public void setConnectionFilter(IConnectionFilter filter) {
-		if (connectionFilter != null) {
-			throw new IllegalStateException("A connection filter already exists!");
-		}
-		connectionFilter = filter;
 	}
 	
 	private void bindTcpSocket(String address, int port) throws IOException {

@@ -17,7 +17,7 @@ import com.taurus.core.util.executor.ExecutorConfig;
  */
 public class ServerConfig {
 	public volatile List<SocketAddress>	socketAddresses					= new ArrayList<SocketAddress>();
-	public volatile IpFilterSettings	ipFilter						= new IpFilterSettings();
+	public volatile IpFilterConfig	ipFilter						= new IpFilterConfig();
 	public volatile int					timerThreadPoolSize				= 1;
 	public volatile int					protocolCompressionThreshold	= 300;
 
@@ -41,12 +41,12 @@ public class ServerConfig {
 	public ExecutorConfig				systemThreadPoolConfig			= new ExecutorConfig();
 	public ExecutorConfig				extensionThreadPoolConfig			= new ExecutorConfig();
 	public ControllerSettings			controllerSettings				= new ControllerSettings();
-
+	public WebServerConfig				webServerConfig					= new WebServerConfig();
 	/**
 	 * ip过滤设置
 	 * @author daixiwei daixiwei15@126.com
 	 */
-	public static final class IpFilterSettings {
+	public static final class IpFilterConfig {
 		public List<String>	addressBlackList			= new ArrayList<String>();
 		public List<String>	addressWhiteList			= new ArrayList<String>();
 		public volatile int	maxConnectionsPerAddress	= 99999;
@@ -76,6 +76,15 @@ public class ServerConfig {
 	public static final class ControllerSettings {
 		public String	name			= "";
 		public String	className		= "";
+	}
+	
+	/**
+	 * web server
+	 * @author daixiwei daixiwei15@126.com
+	 *
+	 */
+	public static final class WebServerConfig {
+		public boolean isActive;
 	}
 
 	private static final void loadThreadPoolConfig(Element em,ExecutorConfig config) {
@@ -120,6 +129,8 @@ public class ServerConfig {
 	    controllerSettings.className = controllerSettingsEm.getChildTextTrim("className");
 	    controllerSettings.name = controllerSettingsEm.getChildTextTrim("name");
 	    
+	    
+	    Element webServerEm = root.getChild("webServer");
 	    
 	    loadThreadPoolConfig(root.getChild("systemThreadPoolConfig"),systemThreadPoolConfig);
 	    

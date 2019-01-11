@@ -15,9 +15,9 @@ import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
-import com.taurus.permanent.bitswarm.core.BitSwarmEngine;
-import com.taurus.permanent.bitswarm.data.Packet;
-import com.taurus.permanent.bitswarm.sessions.Session;
+import com.taurus.permanent.data.PackDataType;
+import com.taurus.permanent.data.Packet;
+import com.taurus.permanent.data.Session;
 
 /**
  * 核心控制器基类
@@ -111,8 +111,12 @@ public abstract class IController implements IEventListener {
 				guid = parm.getInt(REQUEST_GID);
 			ITObject p = null;
 			if (parm.containsKey(REQUEST_PARM)) {
-				byte[] bytes = parm.getByteArray(REQUEST_PARM);
-				p = Utils.bytesToJson(bytes);
+				if(request.getDataType() == PackDataType.BINARY) {
+					byte[] bytes = parm.getByteArray(REQUEST_PARM);
+					p = Utils.bytesToJson(bytes);
+				}else {
+					p = parm.getTObject(REQUEST_PARM);
+				}
 			}
 			handlerRequest(sender, cmdName, p, guid);
 		}
