@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.taurus.core.events.IEvent;
+import com.taurus.core.events.Event;
 import com.taurus.core.events.IEventListener;
 import com.taurus.core.service.IService;
 import com.taurus.core.util.Logger;
@@ -16,7 +16,6 @@ import com.taurus.permanent.core.ServerConfig.SocketAddress;
 import com.taurus.permanent.data.BindableSocket;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
-import com.taurus.permanent.data.SessionManager;
 import com.taurus.permanent.data.SessionType;
 import com.taurus.permanent.io.IOHandler;
 import com.taurus.permanent.io.ProtocolHandler;
@@ -44,6 +43,7 @@ public final class BitSwarmEngine extends BaseCoreService {
 	private IEventListener				eventHandler;
 	private WebSocketService			webSocketService;
 	private ProtocolHandler				protocolHandler;
+	private ConnectionFilter			connectionFilter;
 	
 	public static BitSwarmEngine getInstance() {
 		if (__engine__ == null) {
@@ -63,30 +63,6 @@ public final class BitSwarmEngine extends BaseCoreService {
 	}
 	
 
-	
-	public void start() throws Exception {
-		if (!inited) {
-			initializeServerEngine();
-		}
-		logger.info("Start Bit Swarm Engine!");
-		
-		eventHandler = new IEventListener() {
-			public void handleEvent(IEvent event) {
-				dispatchEvent(event);
-			}
-		};
-		
-		protocolHandler = new ProtocolHandler();
-		
-		coreServicesByName = new ConcurrentHashMap<String, IService>();
-		configByService = new HashMap<IService, Object>();
-		
-		bootSequence();
-		
-		((BaseCoreService) socketReader).addEventListener(TPEvents.SESSION_LOST, this.eventHandler);
-	}
-	
-
 	private final void bootSequence() throws Exception {
 		logger.info("BitSwarmEngine :  { " + Thread.currentThread().getName() + " }");
 		
@@ -100,10 +76,22 @@ public final class BitSwarmEngine extends BaseCoreService {
 		}
 	}
 	
+	private final void setConnectionFilterConfig() {
+		for (String blockedIp : config.ipFilter.addressBlackList) {
+			this.connectionFilter.addBannedAddress(blockedIp);
+		}
+
+		for (String allowedIp : config.ipFilter.addressWhiteList) {
+			this.connectionFilter.addWhiteListAddress(allowedIp);
+		}
+
+		this.connectionFilter.setMaxConnectionsPerIp(config.ipFilter.maxConnectionsPerAddress);
+	}
+	
 	
 	public void write(Packet response) {
 		try {
-			if (this.config.webServerConfig.isActive) {
+			if (this.config.webSocketConfig.isActive) {
 	            final List<Session> webSocketRecipients = new ArrayList<Session>();
 	            final List<Session> socketRecipients = new ArrayList<Session>();
 	            for (final Session session : response.getRecipients()) {
@@ -151,25 +139,33 @@ public final class BitSwarmEngine extends BaseCoreService {
 		
 		sessionManager.setName(DefaultConstants.SERVICE_SESSION_MANAGER);
 		
-		webSocketService = new WebSocketService();
+		if(config.webSocketConfig.isActive) {
+			webSocketService = new WebSocketService();
+			webSocketService.setName(DefaultConstants.SERVICE_WEB_SOCKET);
+			coreServicesByName.put(DefaultConstants.SERVICE_WEB_SOCKET, webSocketService);
+		}
+		
+		
 		
 		socketAcceptor.setName(DefaultConstants.SERVICE_SOCKET_ACCEPTOR);
 		socketReader.setName(DefaultConstants.SERVICE_SOCKET_READER);
 		socketWriter.setName(DefaultConstants.SERVICE_SOCKET_WRITER);
-		webSocketService.setName(DefaultConstants.SERVICE_WEB_SOCKET);
+		
 		
 		coreServicesByName.put(DefaultConstants.SERVICE_SESSION_MANAGER, sessionManager);
 		
 		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_ACCEPTOR, socketAcceptor);
 		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_READER, socketReader);
 		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_WRITER, socketWriter);
-		coreServicesByName.put(DefaultConstants.SERVICE_WEB_SOCKET, webSocketService);
+		
 	}
 	
 	private void stopCoreServices() throws Exception {
 		socketWriter.destroy(null);
 		socketReader.destroy(null);
-		webSocketService.destroy(null);
+		if(webSocketService!=null) {
+			webSocketService.destroy(null);
+		}
 		Thread.sleep(2000L);
 
 		sessionManager.destroy(null);
@@ -185,16 +181,6 @@ public final class BitSwarmEngine extends BaseCoreService {
 				logger.warn("Was not able to bind socket: " + socketCfg);
 			}
 		}
-		
-		for (String blockedIp : config.ipFilter.addressBlackList) {
-			socketAcceptor.getConnectionFilter().addBannedAddress(blockedIp);
-		}
-
-		for (String allowedIp : config.ipFilter.addressWhiteList) {
-			socketAcceptor.getConnectionFilter().addWhiteListAddress(allowedIp);
-		}
-
-		socketAcceptor.getConnectionFilter().setMaxConnectionsPerIp(config.ipFilter.maxConnectionsPerAddress);
 
 		List<BindableSocket> sockets = socketAcceptor.getBoundSockets();
 		String message = "Listening Sockets: ";
@@ -236,13 +222,41 @@ public final class BitSwarmEngine extends BaseCoreService {
 		return this.config;
 	}
 
+	public ConnectionFilter getConnectionFilter() {
+		return connectionFilter;
+	}
 	
 	public SessionManager getSessionManager() {
 		return this.sessionManager;
 	}
 	
 	public void init(Object o) {
-		throw new UnsupportedOperationException("This call is not supported in this class!");
+		if (!inited) {
+			initializeServerEngine();
+		}
+		logger.info("Start Bit Swarm Engine!");
+		
+		eventHandler = new IEventListener() {
+			public void handleEvent(Event event) {
+				dispatchEvent(event);
+			}
+		};
+		
+		protocolHandler = new ProtocolHandler();
+		
+		connectionFilter = new ConnectionFilter();
+		setConnectionFilterConfig();
+		
+		coreServicesByName = new ConcurrentHashMap<String, IService>();
+		configByService = new HashMap<IService, Object>();
+		
+		try {
+			bootSequence();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+		socketReader.addEventListener(TPEvents.SESSION_LOST, this.eventHandler);
 	}
 	
 	public void destroy(Object o) {

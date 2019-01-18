@@ -1,11 +1,11 @@
 package com.taurus.permanent.data;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.taurus.permanent.core.SessionManager;
 
 /**
  * 核心用户session对象
@@ -15,7 +15,7 @@ public final class Session {
 	public static final String		DATA_BUFFER			= "session_data_buffer";
 	public static final String		PACKET_READ_STATE	= "read_state";
 	private static final String		NO_IP				= "NO_IP";
-	private static final String		SESSION_HASH		= "not";
+
 
 	private static AtomicInteger	idCounter			= new AtomicInteger(0);
 
@@ -27,20 +27,17 @@ public final class Session {
 	private volatile long			lastReadTime;
 	private volatile long			lastWriteTime;
 	private volatile long			lastActivityTime;
-	private volatile long			lastLoggedInActivityTime;
 	private int						id;
-	private String					hashId				= SESSION_HASH;
+	private volatile String			hashId;
 	private SessionType				type;
-	private volatile String			clientIpAddress;
+	private volatile String			clientIpAddress 	= NO_IP;
 	private volatile int			clientPort;
 	private int						serverPort;
 	private String					serverAddress;
-	private int						maxIdleTime;
-	private int						maxLoggedInIdleTime;
+	private int						timeout;
 	private volatile boolean		frozen				= false;
 	private boolean					markedForEviction	= false;
 	private volatile boolean		connected			= false;
-	private volatile boolean		loggedIn			= false;
 	private IPacketQueue			packetQueue;
 	private Map<String, Object>		systemProperties;
 
@@ -177,11 +174,11 @@ public final class Session {
 	}
 
 	/**
-	 * 获取最大空闲时间
+	 * 获取超时时间
 	 * @return
 	 */
-	public int getMaxIdleTime() {
-		return this.maxIdleTime;
+	public int getTimeout() {
+		return this.timeout;
 	}
 
 	/**
@@ -249,86 +246,21 @@ public final class Session {
 		this.connected = value;
 	}
 
-	/**
-	 * session 是否被验证
-	 * @return
-	 */
-	public boolean isLoggedIn() {
-		return this.loggedIn;
-	}
-
-	/**
-	 * 设置验证对象
-	 * @param value
-	 */
-	public void setLoggedIn(boolean value) {
-		this.loggedIn = value;
-	}
-
-	/**
-	 * 获取验证以后session空闲时间
-	 * @return
-	 */
-	public int getMaxLoggedInIdleTime() {
-		return this.maxLoggedInIdleTime;
-	}
-
-	/**
-	 * 设置验证以后session空闲时间
-	 * @param idleTime
-	 */
-	public void setMaxLoggedInIdleTime(int idleTime) {
-		if (idleTime < this.maxIdleTime) {
-			idleTime = this.maxIdleTime + 60;
-		}
-
-		this.maxLoggedInIdleTime = idleTime;
-	}
-
-	/**
-	 * 获取验证以后session激活时间
-	 * @return
-	 */
-	public long getLastLoggedInActivityTime() {
-		return this.lastLoggedInActivityTime;
-	}
-
-	/**
-	 * 设置获取验证以后session激活时间
-	 * @param timestamp
-	 */
-	public void setLastLoggedInActivityTime(long timestamp) {
-		this.lastLoggedInActivityTime = timestamp;
-	}
 
 	/**
 	 * session 是否空闲，做超时踢出处理
 	 * @return
 	 */
 	public boolean isIdle() {
-		if (this.loggedIn) {
-			return isLoggedInIdle();
-		}
 		return isSocketIdle();
 	}
 
 	private boolean isSocketIdle() {
 		boolean isIdle = false;
 
-		if (this.maxIdleTime > 0) {
+		if (this.timeout > 0) {
 			long elapsedSinceLastActivity = System.currentTimeMillis() - this.lastActivityTime;
-			isIdle = elapsedSinceLastActivity / 1000L > this.maxIdleTime;
-		}
-
-		return isIdle;
-	}
-
-	private boolean isLoggedInIdle() {
-		boolean isIdle = false;
-
-		if (this.maxLoggedInIdleTime > 0) {
-			long elapsedSinceLastActivity = System.currentTimeMillis() - this.lastLoggedInActivityTime;
-			isIdle = elapsedSinceLastActivity / 1000L > this.maxLoggedInIdleTime;
+			isIdle = elapsedSinceLastActivity / 1000L > this.timeout;
 		}
 
 		return isIdle;
@@ -351,29 +283,31 @@ public final class Session {
 			throw new IllegalArgumentException("You cannot overwrite the connection linked to a Session!");
 		}
 		if(connection.checkConnection()) {
+			setSocketConnection(connection);
 			this.connected = true;
-			this.connection = connection;
 		}
 	}
 
-//	private void setSocketConnection(ISocketChannel connection) {
-//		this.connection = connection;
-//		this.serverPort = connection.socket().getLocalPort();
-//		this.serverAddress = connection.socket().getLocalAddress().toString().substring(1);
-//
-//		if ((connection != null) && (connection.socket() != null) && (!connection.socket().isClosed())) {
-//			String hostAddr = connection.socket().getRemoteSocketAddress().toString().substring(1);
-//			String[] adr = hostAddr.split("\\:");
-//			this.clientIpAddress = adr[0];
-//			try {
-//				this.clientPort = Integer.parseInt(adr[1]);
-//			} catch (NumberFormatException localNumberFormatException) {
-//			}
-//			this.connected = true;
-//		} else {
-//			this.clientIpAddress = "[unknown]";
-//		}
-//	}
+	private void setSocketConnection(ISocketChannel connection) {
+		this.connection = connection;
+		String svr_host = connection.getLocalAddress().toString().substring(1);
+		String[] svr_adr =svr_host.split("\\:");
+		this.serverAddress = svr_adr[0];
+		try {
+			this.serverPort = Integer.parseInt(svr_adr[1]);
+		} catch (NumberFormatException localNumberFormatException) {
+		}
+
+
+		String client_host = connection.getRemoteAddress().toString().substring(1);
+		String[] client_adr = client_host.split("\\:");
+		this.clientIpAddress = client_adr[0];
+		try {
+			this.clientPort = Integer.parseInt(client_adr[1]);
+		} catch (NumberFormatException localNumberFormatException) {
+		}
+
+	}
 
 	/**
 	 * 设置网络包队列
@@ -415,7 +349,10 @@ public final class Session {
 	 * @param timestamp
 	 */
 	public void setLastReadTime(long timestamp) {
-		this.lastReadTime = (this.lastActivityTime = timestamp);
+		this.lastReadTime = timestamp;
+		if(this.hashId!=null) {
+			this.lastActivityTime = timestamp;
+		}
 	}
 
 	/**
@@ -423,7 +360,10 @@ public final class Session {
 	 * @param timestamp
 	 */
 	public void setLastWriteTime(long timestamp) {
-		this.lastWriteTime = (this.lastActivityTime = timestamp);
+		this.lastWriteTime = timestamp;
+		if(this.hashId!=null) {
+			this.lastActivityTime = timestamp;
+		}
 	}
 
 	/**
@@ -435,11 +375,11 @@ public final class Session {
 	}
 
 	/**
-	 * 设置最大空闲时间
+	 * 设置超时时间
 	 * @param idleTime
 	 */
-	public void setMaxIdleTime(int idleTime) {
-		this.maxIdleTime = idleTime;
+	public void setTimeout(int idleTime) {
+		this.timeout = idleTime;
 	}
 
 	/**
@@ -495,31 +435,17 @@ public final class Session {
 		this.packetQueue = null;
 		this.frozen = true;
 		try {
-//			if ((type == SessionType.NORMAL) && (connection != null)) {
-//				Socket socket = connection.socket();
-//
-//				if ((socket != null) && (!socket.isClosed())) {
-//					socket.shutdownInput();
-//					socket.shutdownOutput();
-//					socket.close();
-//					connection.close();
-//				}
-//
-//			} else if (type == SessionType.WEBSOCKET) {
-//			}
 			if(connection!=null) {
 				connection.close();
 			}
-
 		} finally {
 			connected = false;
-			loggedIn = false;
 			SessionManager.getInstance().removeSession(this);
 		}
 	}
 
 	public String toString() {
-		return String.format("{ Id: %s, Type: %s, IP: %s }", id + (loggedIn ? ("[" + this.hashId + "]") : ""), type, getFullIpAddress());
+		return String.format("{ Id: %s, Type: %s, IP: %s }", id + (hashId!=null ? ("[" + this.hashId + "]") : ""), type, getFullIpAddress());
 	}
 
 	public boolean equals(Object obj) {

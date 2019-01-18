@@ -17,31 +17,27 @@ import com.taurus.core.util.executor.ExecutorConfig;
  */
 public class ServerConfig {
 	public volatile List<SocketAddress>	socketAddresses					= new ArrayList<SocketAddress>();
-	public volatile IpFilterConfig	ipFilter						= new IpFilterConfig();
+	public volatile IpFilterConfig		ipFilter						= new IpFilterConfig();
 	public volatile int					timerThreadPoolSize				= 1;
-	public volatile int					protocolCompressionThreshold	= 300;
-
-	public volatile boolean				useDebugMode					= false;
-	public volatile boolean				useFriendlyExceptions			= true;
+	public volatile int					protocolCompression				= 512;
 
 	public String						readBufferType					= "HEAP";
 	public String						writeBufferType					= "HEAP";
-	public int							maxIncomingRequestSize			= 4096;
+	public int							maxPacketSize					= 4096;
 	public int							maxReadBufferSize				= 1024;
 	public int							maxWriteBufferSize				= 32768;
 	public int							socketAcceptorThreadPoolSize	= 1;
 	public int							socketReaderThreadPoolSize		= 1;
 	public int							socketWriterThreadPoolSize		= 1;
 	public int							sessionPacketQueueSize			= 120;
-	public int							sessionMaxIdleTime;
-	public int							userMaxIdleTime;
+	public int							sessionTimeout					= 15;
 	public boolean						tcpNoDelay						= false;
 
-	public volatile boolean				ghostHunterEnabled				= true;
 	public ExecutorConfig				systemThreadPoolConfig			= new ExecutorConfig();
-	public ExecutorConfig				extensionThreadPoolConfig			= new ExecutorConfig();
-	public ControllerSettings			controllerSettings				= new ControllerSettings();
-	public WebServerConfig				webServerConfig					= new WebServerConfig();
+	public ExecutorConfig				extensionThreadPoolConfig		= new ExecutorConfig();
+	public ExtensionConfig				extensionConfig					= new ExtensionConfig();
+	public WebSocketConfig				webSocketConfig					= new WebSocketConfig();
+	
 	/**
 	 * ip过滤设置
 	 * @author daixiwei daixiwei15@126.com
@@ -73,18 +69,18 @@ public class ServerConfig {
 	 * @author daixiwei daixiwei15@126.com
 	 *
 	 */
-	public static final class ControllerSettings {
+	public static final class ExtensionConfig {
 		public String	name			= "";
 		public String	className		= "";
 	}
 	
 	/**
-	 * web server
+	 * web socket
 	 * @author daixiwei daixiwei15@126.com
 	 *
 	 */
-	public static final class WebServerConfig {
-		public boolean isActive;
+	public static final class WebSocketConfig {
+		public boolean isActive = true;
 	}
 
 	private static final void loadThreadPoolConfig(Element em,ExecutorConfig config) {
@@ -104,6 +100,19 @@ public class ServerConfig {
 		Element root = document.getRootElement(); 
 		
 		this.timerThreadPoolSize = Integer.parseInt(root.getChildTextTrim("timerThreadPoolSize"));
+		this.protocolCompression = Integer.parseInt(root.getChildTextTrim("protocolCompression"));
+		this.readBufferType = root.getChildTextTrim("readBufferType");
+		this.writeBufferType = root.getChildTextTrim("readBufferType");
+		this.maxPacketSize = Integer.parseInt(root.getChildTextTrim("maxPacketSize"));
+		this.maxReadBufferSize = Integer.parseInt(root.getChildTextTrim("maxReadBufferSize"));
+		this.maxWriteBufferSize = Integer.parseInt(root.getChildTextTrim("maxWriteBufferSize"));
+		this.socketAcceptorThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketAcceptorThreadPoolSize"));
+		this.socketReaderThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketWriterThreadPoolSize"));
+		this.socketWriterThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketWriterThreadPoolSize"));
+		this.maxPacketSize = Integer.parseInt(root.getChildTextTrim("maxPacketSize"));
+		this.sessionPacketQueueSize = Integer.parseInt(root.getChildTextTrim("sessionPacketQueueSize"));
+		this.sessionTimeout = Integer.parseInt(root.getChildTextTrim("sessionTimeout"));
+		this.tcpNoDelay = Boolean.parseBoolean(root.getChildTextTrim("tcpNoDelay"));
 		
 		Element addressesEm = root.getChild("socketAddresses");
 		Iterator<?> itr = (addressesEm.getChildren("socket")).iterator();
@@ -118,19 +127,27 @@ public class ServerConfig {
 	    
 	    
 	    Element ipFilterEm = root.getChild("ipFilter");
-//	    ipFilterEm.getChild("addressBlackList");
-//	    itr = (addressesEm.getChildren("socket")).iterator();
-//	    while(itr.hasNext()) {
-//	    	
-//	    }
+	    Element addressBlackListEm = ipFilterEm.getChild("addressBlackList");
+	    itr = (addressBlackListEm.getChildren("string")).iterator();
+	    while(itr.hasNext()) {
+	    	Element socketEm = (Element)itr.next();
+	    	ipFilter.addressBlackList.add(socketEm.getTextTrim());
+	    }
+	    Element addressWhiteListEm = ipFilterEm.getChild("addressWhiteList");
+	    itr = (addressWhiteListEm.getChildren("string")).iterator();
+	    while(itr.hasNext()) {
+	    	Element socketEm = (Element)itr.next();
+	    	ipFilter.addressWhiteList.add(socketEm.getTextTrim());
+	    }
 	    ipFilter.maxConnectionsPerAddress = Integer.parseInt(ipFilterEm.getChildTextTrim("maxConnectionsPerAddress"));
 	    
-	    Element controllerSettingsEm = root.getChild("controllerSettings");
-	    controllerSettings.className = controllerSettingsEm.getChildTextTrim("className");
-	    controllerSettings.name = controllerSettingsEm.getChildTextTrim("name");
+	    Element extensionConfigEm = root.getChild("extensionConfig");
+	    extensionConfig.className = extensionConfigEm.getChildTextTrim("className");
+	    extensionConfig.name = extensionConfigEm.getChildTextTrim("name");
 	    
 	    
-	    Element webServerEm = root.getChild("webServer");
+	    Element webSocketEm = root.getChild("webSocket");
+	    webSocketConfig.isActive = Boolean.parseBoolean(webSocketEm.getChildTextTrim("isActive"));
 	    
 	    loadThreadPoolConfig(root.getChild("systemThreadPoolConfig"),systemThreadPoolConfig);
 	    

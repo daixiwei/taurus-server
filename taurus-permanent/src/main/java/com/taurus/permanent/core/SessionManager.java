@@ -1,7 +1,6 @@
-package com.taurus.permanent.data;
+package com.taurus.permanent.core;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,11 +11,14 @@ import com.taurus.core.events.Event;
 import com.taurus.core.service.AbstractService;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.task.ITaskHandler;
-import com.taurus.core.util.task.TaskScheduler;
 import com.taurus.core.util.task.Task;
+import com.taurus.core.util.task.TaskScheduler;
 import com.taurus.permanent.TaurusPermanent;
-import com.taurus.permanent.core.BitSwarmEngine;
-import com.taurus.permanent.core.TPEvents;
+import com.taurus.permanent.data.IPacketQueue;
+import com.taurus.permanent.data.ISocketChannel;
+import com.taurus.permanent.data.NonBlockingPacketQueue;
+import com.taurus.permanent.data.Session;
+import com.taurus.permanent.data.SessionType;
 
 /**
  * session管理器，负责创建，添加和删除session
@@ -83,7 +85,7 @@ public final class SessionManager extends AbstractService {
 		if (sessionList.size() > highestCCS) {
 			highestCCS = sessionList.size();
 		}
-//		logger.info("Session created: " + session);
+		logger.info("Session created: " + session);
 	}
 
 	/**
@@ -92,7 +94,7 @@ public final class SessionManager extends AbstractService {
 	 * @return
 	 */
 	public boolean containsSession(Session session) {
-		return sessionsById.containsValue(session);
+		return sessionsById.containsKey(session.getId());
 	}
 
 	/**
@@ -100,21 +102,21 @@ public final class SessionManager extends AbstractService {
 	 * @param session
 	 */
 	public void removeSession(Session session) {
-		if (session == null)
-			return;
+		if (session == null)return;
+		if(!sessionsById.containsKey(session.getId()))return;
 		synchronized (sessionList) {
 			sessionList.remove(session);
 		}
 		ISocketChannel connection = session.getConnection();
 		sessionsById.remove(session.getId());
 		if (connection != null) {
-			sessionsByConnection.remove(connection);
+			sessionsByConnection.remove(connection.getChannel());
 		}
 		if ((session.getType() == SessionType.NORMAL) || (session.getType() == SessionType.WEBSOCKET)) {
-			engine.getSocketAcceptor().getConnectionFilter().removeAddress(session.getAddress());
+			engine.getConnectionFilter().removeAddress(session.getAddress());
 		}
 
-//		logger.info("Session removed: " + session);
+		logger.info("Session removed: " + session);
 	}
 
 	/**
@@ -224,7 +226,7 @@ public final class SessionManager extends AbstractService {
 	public Session createSession(ISocketChannel channel,SessionType type) {
 		Session session = new Session();
 		session.setConnection(channel);
-		session.setMaxIdleTime(engine.getConfig().sessionMaxIdleTime);
+		session.setTimeout(engine.getConfig().sessionTimeout);
 		session.setType(type);
 		IPacketQueue packetQueue = new NonBlockingPacketQueue(engine.getConfig().sessionPacketQueueSize);
 		session.setPacketQueue(packetQueue);
@@ -252,7 +254,7 @@ public final class SessionManager extends AbstractService {
 					if (!session.isIdle()) {
 						continue;
 					}
-					if (session.isLoggedIn()) {
+					if (session.getHashId()!=null) {
 						logger.info("session timeout:" + session);
 
 						session.setMarkedForEviction();
@@ -274,11 +276,6 @@ public final class SessionManager extends AbstractService {
 
 			try {
 				connection.close();
-//				if (connection.socket() != null) {
-//					connection.socket().shutdownInput();
-//					connection.socket().shutdownOutput();
-//					connection.close();
-//				}
 				session.setConnected(false);
 			} catch (Exception err) {
 				this.logger.warn("Failed closing connection while removing idle Session: " + session);

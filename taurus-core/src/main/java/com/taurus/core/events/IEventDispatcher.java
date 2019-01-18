@@ -36,5 +36,5 @@ public interface IEventDispatcher {
 	 * 
 	 * @param event
 	 */
-	public void dispatchEvent(IEvent event);
+	public void dispatchEvent(Event event);
 }

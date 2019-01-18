@@ -51,7 +51,7 @@ public final class EventManager extends AbstractService implements IEventDispatc
 		dispatcher.removeEventListener(eventName, listener);
 	}
 
-	public void dispatchEvent(IEvent event) {
+	public void dispatchEvent(Event event) {
 		dispatcher.dispatchEvent(event);
 	}
 

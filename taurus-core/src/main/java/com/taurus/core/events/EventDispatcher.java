@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.taurus.core.util.Logger;
 
 /**   
- * 事件派发器
+ *  EventDispatcher 事件派发器类，负责进行事件的发送和侦听。
 */
 public class EventDispatcher implements IEventDispatcher {
 	
@@ -54,7 +54,7 @@ public class EventDispatcher implements IEventDispatcher {
 	}
 	
 	@Override
-	public void dispatchEvent(IEvent event) {
+	public void dispatchEvent(Event event) {
 		Set<IEventListener> listeners = (Set<IEventListener>) listenersByEvent.get(event.getName());
 		if ((listeners != null) && (listeners.size() > 0)) {
 			for (IEventListener listenerObj : listeners) {
@@ -75,9 +75,9 @@ public class EventDispatcher implements IEventDispatcher {
 	
 	private static final class EventRunner implements Runnable {
 		private final IEventListener	listener;
-		private final IEvent			event;
+		private final Event			event;
 		
-		public EventRunner(IEventListener listener, IEvent event) {
+		public EventRunner(IEventListener listener, Event event) {
 			this.listener = listener;
 			this.event = event;
 		}

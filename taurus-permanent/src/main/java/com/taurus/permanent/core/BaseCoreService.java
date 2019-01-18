@@ -32,10 +32,6 @@ public abstract class BaseCoreService extends EventDispatcher implements IServic
 		this.name = name;
 	}
 
-	public void handleMessage(Object param) {
-		throw new UnsupportedOperationException("This method should be overridden by the child class!");
-	}
-
 	public boolean isActive() {
 		return active;
 	}

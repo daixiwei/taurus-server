@@ -203,9 +203,9 @@ public class TDataSerializer {
 		}
 		if ((o instanceof HashMap)) {
 			HashMap jso = (HashMap) o;
-			if (jso.size() == 0) {
-				return new TDataWrapper(TDataType.NULL, null);
-			}
+//			if (jso.size() == 0) {
+//				return new TDataWrapper(TDataType.NULL, null);
+//			}
 			return new TDataWrapper(TDataType.TOBJECT, decodeTObject(jso));
 		}
 		if ((o instanceof List)) {
@@ -517,7 +517,7 @@ public class TDataSerializer {
 	}
 
 	private TDataWrapper binDecode_STRING(ByteBuffer buffer) throws RuntimeException {
-		short strLen = buffer.getShort();
+		int strLen = buffer.getInt();
 		if (strLen < 0) {
 			throw new RuntimeException("Error decoding String. Negative size: " + strLen);
 		}
@@ -594,15 +594,15 @@ public class TDataSerializer {
 
 	private ByteBuffer binEncode_STRING(ByteBuffer buffer, String value) {
 		if (StringUtil.isEmpty(value)) {
-			ByteBuffer buf = ByteBuffer.allocate(3);
+			ByteBuffer buf = ByteBuffer.allocate(5);
 			buf.put((byte) TDataType.STRING.getTypeID());
-			buf.putShort((short) 0);
+			buf.putInt(0);
 			return addData(buffer, buf.array());
 		}
 		byte[] stringBytes = value.getBytes();
-		ByteBuffer buf = ByteBuffer.allocate(3 + stringBytes.length);
+		ByteBuffer buf = ByteBuffer.allocate(5 + stringBytes.length);
 		buf.put((byte) TDataType.STRING.getTypeID());
-		buf.putShort((short) stringBytes.length);
+		buf.putInt(stringBytes.length);
 		buf.put(stringBytes);
 		return addData(buffer, buf.array());
 	}

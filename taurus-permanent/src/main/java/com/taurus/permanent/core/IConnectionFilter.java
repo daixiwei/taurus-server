@@ -1,4 +1,4 @@
-package com.taurus.permanent.bitswarm.core;
+package com.taurus.permanent.core;
 
 
 /**

@@ -20,12 +20,6 @@ public interface IService {
 	public void destroy(Object o);
 	
 	/**
-	 * 处理消息事件
-	 * @param o
-	 */
-	public void handleMessage(Object o);
-	
-	/**
 	 * 获取Service名称
 	 * @return
 	 */

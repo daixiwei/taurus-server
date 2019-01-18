@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import com.taurus.core.events.Event;
 import com.taurus.core.events.EventManager;
-import com.taurus.core.events.IEvent;
 import com.taurus.core.events.IEventListener;
 import com.taurus.core.plugin.PluginService;
 import com.taurus.core.util.Logger;
@@ -15,12 +15,13 @@ import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.core.util.task.TaskScheduler;
 import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.DefaultConstants;
-import com.taurus.permanent.core.IController;
+import com.taurus.permanent.core.Extension;
 import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.ServerState;
+import com.taurus.permanent.core.SessionManager;
+import com.taurus.permanent.core.SystemController;
 import com.taurus.permanent.core.TPEvents;
 import com.taurus.permanent.data.Session;
-import com.taurus.permanent.data.SessionManager;
 import com.taurus.permanent.util.GhostUserHunter;
 
 /**
@@ -49,10 +50,11 @@ public final class TaurusPermanent {
 	private TaskScheduler				taskScheduler;
 	private EventManager				eventManager;
 	private GhostUserHunter				ghostUserHunter;
-	private IController					controller;
+	private SystemController			controller;
+	private Extension					extension;
+	private TaurusExecutor				systemExecutor;
+	private TaurusExecutor				extensionExecutor;
 
-	private TaurusExecutor	systemExecutor;
-	private TaurusExecutor	extensionExecutor;
 	/**
 	 * get main instance
 	 */
@@ -65,11 +67,11 @@ public final class TaurusPermanent {
 
 	private TaurusPermanent() {
 		bitSwarmEngine = BitSwarmEngine.getInstance();
-		
+
 		networkEvtListener = new NetworkEvtListener();
 		timerPool = new ScheduledThreadPoolExecutor(1);
 		log = Logger.getLogger(getClass());
-		
+
 	}
 
 	public String getVersion() {
@@ -83,40 +85,43 @@ public final class TaurusPermanent {
 		return config;
 	}
 
-
 	public void start() {
-		System.out.println("\n==============================================================================\n" + ">>Begin start taurus-permanent server....\n"
-				+ "============================================================================== \n");
+		System.out.println("\n==============================================================================\n" + 
+						">>Begin start taurus-permanent server....\n"
+						+ "============================================================================== \n");
 		if (!initialized) {
 			initialize();
 		}
-		
+
 		try {
-			
+
 			PluginService.getInstance().loadConfig();
 			log.info("Load taurus-core config finish");
-			
+
 			this.config = loadServerSettings();
 			initExecutors();
-			
+
 			this.taskScheduler = new TaskScheduler();
 			this.taskScheduler.init(null);
-			
+
 			this.eventManager = new EventManager(extensionExecutor);
 			eventManager.init(null);
-			
 
 			timerPool.setCorePoolSize(config.timerThreadPoolSize);
+			bitSwarmEngine.init(null);
 
-			controller = createController();
-
-			bitSwarmEngine.start();
-			log.info("\n\n==============================================================================\n" + ">>Init controler...\n"
+			log.info("\n\n==============================================================================\n" + 
+					">>Init Extension...\n"
 					+ "============================================================================== \n");
-
+			controller = new SystemController();
+			ghostUserHunter = new GhostUserHunter();
+			extension = instanceExtension();
 			controller.init(null);
+			extension.onStart();
+			
 			state = ServerState.STARTED;
-			log.info("\n\n==============================================================================\n" + ">>Server(" + version + ") ready!\n"
+			log.info("\n\n==============================================================================\n" + 
+					">>Server(" + version + ") ready!\n"
 					+ "============================================================================== \n");
 
 			serverStartTime = System.currentTimeMillis();
@@ -128,15 +133,15 @@ public final class TaurusPermanent {
 	}
 
 	private void initExecutors() {
-        final ExecutorConfig sys_cfg = this.config.systemThreadPoolConfig;
-        sys_cfg.name = "Sys";
-        this.systemExecutor = new TaurusExecutor(sys_cfg);
-        
-        final ExecutorConfig ext_cfg = this.config.extensionThreadPoolConfig;
-        ext_cfg.name = "Ext";
-        this.extensionExecutor = new TaurusExecutor(ext_cfg);
-    }
-	
+		final ExecutorConfig sys_cfg = this.config.systemThreadPoolConfig;
+		sys_cfg.name = "Sys";
+		this.systemExecutor = new TaurusExecutor(sys_cfg);
+
+		final ExecutorConfig ext_cfg = this.config.extensionThreadPoolConfig;
+		ext_cfg.name = "Ext";
+		this.extensionExecutor = new TaurusExecutor(ext_cfg);
+	}
+
 	/**
 	 * shut down server.
 	 */
@@ -149,11 +154,11 @@ public final class TaurusPermanent {
 			bitSwarmEngine.destroy(null);
 			eventManager.destroy(null);
 			this.controller.destroy(null);
+			extension.onStop();
 		} catch (Exception e) {
 			log.error("shut down exception!", e);
 		}
 	}
-
 
 	public ScheduledThreadPoolExecutor getTimerPool() {
 		return timerPool;
@@ -166,11 +171,11 @@ public final class TaurusPermanent {
 	public TaurusExecutor getSystemExecutor() {
 		return systemExecutor;
 	}
-	
+
 	public TaurusExecutor getExtensionExecutor() {
 		return extensionExecutor;
 	}
-	
+
 	public EventManager getEventManager() {
 		return eventManager;
 	}
@@ -179,8 +184,12 @@ public final class TaurusPermanent {
 		return bitSwarmEngine.getSessionManager();
 	}
 
-	public IController getController() {
+	public SystemController getController() {
 		return controller;
+	}
+
+	public Extension getExtension() {
+		return extension;
 	}
 
 	public ServerState getState() {
@@ -208,8 +217,6 @@ public final class TaurusPermanent {
 			throw new IllegalStateException("SmartFoxServer engine already initialized!");
 		}
 
-		ghostUserHunter = new GhostUserHunter();
-
 		bitSwarmEngine.addEventListener(TPEvents.SESSION_LOST, networkEvtListener);
 		bitSwarmEngine.addEventListener(TPEvents.SESSION_IDLE, networkEvtListener);
 		bitSwarmEngine.addEventListener(TPEvents.SESSION_IDLE_CHECK_COMPLETE, networkEvtListener);
@@ -217,44 +224,37 @@ public final class TaurusPermanent {
 		initialized = true;
 	}
 
-
-
-	private IController createController(){
-		ServerConfig.ControllerSettings settings = config.controllerSettings;
-		if ((settings.className == null) || (settings.className.length() == 0)) {
+	private Extension instanceExtension() {
+		ServerConfig.ExtensionConfig extensionConfig = config.extensionConfig;
+		if ((extensionConfig.className == null) || (extensionConfig.className.length() == 0)) {
 			throw new RuntimeException("Extension file parameter is missing!");
 		}
-		if ((settings.name == null) || (settings.name.length() == 0)) {
+		if ((extensionConfig.name == null) || (extensionConfig.name.length() == 0)) {
 			throw new RuntimeException("Extension name parameter is missing!");
 		}
-		IController controller = null;
+		Extension extension = null;
 		try {
-			Class<?> extensionClass = Class.forName(settings.className);
-			if (!IController.class.isAssignableFrom(extensionClass)) {
-				throw new RuntimeException("Controller does not implement IController interface: " + settings.name);
+			Class<?> extensionClass = Class.forName(extensionConfig.className);
+			if (!Extension.class.isAssignableFrom(extensionClass)) {
+				throw new RuntimeException("Controller does not implement IController interface: " + extensionConfig.name);
 			}
-			controller = (IController) extensionClass.newInstance();
+			extension = (Extension) extensionClass.newInstance();
+			extension.setName(extensionConfig.name);
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException("Illegal access while instantiating class: " + settings.className);
+			throw new RuntimeException("Illegal access while instantiating class: " + extensionConfig.className);
 		} catch (InstantiationException e) {
-			throw new RuntimeException("Cannot instantiate class: " + settings.className);
+			throw new RuntimeException("Cannot instantiate class: " + extensionConfig.className);
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Class not found: " + settings.className);
+			throw new RuntimeException("Class not found: " + extensionConfig.className);
 		}
-		// controller.setName(settings.name);
-		return controller;
+		return extension;
 	}
-
-	
 
 	private void onSessionClosed(Session session) {
 		controller.disconnect(session);
 	}
 
 	private void onSessionIdle(Session idleSession) {
-		if (!idleSession.isLoggedIn()) {
-			throw new RuntimeException("IdleSession event ignored, cannot find any User for Session: " + idleSession);
-		}
 		controller.disconnect(idleSession);
 	}
 
@@ -265,7 +265,7 @@ public final class TaurusPermanent {
 		private NetworkEvtListener() {
 		}
 
-		public void handleEvent(IEvent event) {
+		public void handleEvent(Event event) {
 			String evtName = event.getName();
 
 			if (evtName.equals(TPEvents.SESSION_LOST)) {
@@ -275,7 +275,7 @@ public final class TaurusPermanent {
 					throw new RuntimeException("session is null!");
 				}
 				onSessionClosed(session);
-			} else if ((evtName.equals(TPEvents.SESSION_IDLE_CHECK_COMPLETE)) && (getConfig().ghostHunterEnabled)) {
+			} else if ((evtName.equals(TPEvents.SESSION_IDLE_CHECK_COMPLETE))) {
 				ghostUserHunter.hunt();
 			} else if (evtName.equals(TPEvents.SESSION_IDLE)) {
 				onSessionIdle((Session) event.getParameter(TPEvents.PARAM_SESSION));

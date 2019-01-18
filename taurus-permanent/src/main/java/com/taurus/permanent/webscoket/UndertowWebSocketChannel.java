@@ -18,7 +18,7 @@ public class UndertowWebSocketChannel implements ISocketChannel{
 	}
 	
 	@Override
-	public long write(ByteBuffer buffer) throws IOException {
+	public long write(ByteBuffer buffer) {
 		return 0;
 	}
 

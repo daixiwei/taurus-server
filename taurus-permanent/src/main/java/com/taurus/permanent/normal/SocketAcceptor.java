@@ -17,13 +17,11 @@ import java.util.concurrent.Executors;
 import com.taurus.core.util.Logger;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
-import com.taurus.permanent.core.ConnectionFilter;
 import com.taurus.permanent.core.DefaultConstants;
-import com.taurus.permanent.core.ServerConfig;
+import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.core.ServerConfig.SocketAddress;
 import com.taurus.permanent.data.BindableSocket;
 import com.taurus.permanent.data.Session;
-import com.taurus.permanent.data.SessionManager;
 import com.taurus.permanent.data.SessionType;
 
 /**
@@ -38,7 +36,7 @@ public class SocketAcceptor extends BaseCoreService implements  Runnable {
 	private final ExecutorService	threadPool;
 	private List<SocketChannel>		acceptableConnections;
 	private List<BindableSocket>	boundSockets;
-	private ConnectionFilter		connectionFilter;
+	
 	private SessionManager			sessionManager;
 	private SocketReader			socketReader;
 	private Selector				acceptSelector;
@@ -60,7 +58,6 @@ public class SocketAcceptor extends BaseCoreService implements  Runnable {
 		boundSockets = new ArrayList<BindableSocket>();
 		socketReader = engine.getSocketReader();
 		
-		connectionFilter = new ConnectionFilter();
 		try {
 			acceptSelector = Selector.open();
 			logger.info("AcceptSelector opened");
@@ -164,7 +161,7 @@ public class SocketAcceptor extends BaseCoreService implements  Runnable {
 					if (iAddr == null) {
 						continue;
 					}
-					if(!connectionFilter.validateAndAddAddress(iAddr.getHostAddress())){
+					if(!engine.getConnectionFilter().validateAndAddAddress(iAddr.getHostAddress())){
 						try {
 							connection.socket().shutdownInput();
 							connection.socket().shutdownOutput();
@@ -211,9 +208,7 @@ public class SocketAcceptor extends BaseCoreService implements  Runnable {
 		return list;
 	}
 	
-	public ConnectionFilter getConnectionFilter() {
-		return connectionFilter;
-	}
+	
 	
 	private void bindTcpSocket(String address, int port) throws IOException {
 		ServerSocketChannel socketChannel = ServerSocketChannel.open();

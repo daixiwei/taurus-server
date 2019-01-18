@@ -7,6 +7,7 @@ package com.taurus.permanent.io;
 public class PendingPacket {
 	private Object			buffer;
 	private int				expectedLen	= -1;
+	public boolean 			compressed;
 	
 	public PendingPacket() {
 

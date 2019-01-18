@@ -1,5 +1,6 @@
 package com.taurus.permanent.io;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.taurus.core.entity.ITObject;
@@ -9,7 +10,6 @@ import com.taurus.core.util.Utils;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BitSwarmEngine;
-import com.taurus.permanent.data.PackDataType;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
 
@@ -24,13 +24,13 @@ public class BinaryIoHandler {
 	private final BitSwarmEngine	engine;
 	private volatile long			packetsRead				= 0L;
 	private volatile long			droppedIncomingPackets	= 0L;
-	private final int				maxIncomingPacketSize;
+	private final int				maxPacketSize;
 	private TaurusExecutor 			systemTreadPool;
 	
 	public BinaryIoHandler(IOHandler parentHandler) {
 		this.log = Logger.getLogger(getClass());
 		this.engine = BitSwarmEngine.getInstance();
-		this.maxIncomingPacketSize = engine.getConfig().maxIncomingRequestSize;
+		this.maxPacketSize = engine.getConfig().maxPacketSize;
 		this.systemTreadPool = TaurusPermanent.getInstance().getSystemExecutor();
 	}
 
@@ -44,6 +44,17 @@ public class BinaryIoHandler {
 
 	public void handleWrite(Packet packet) throws Exception {
 		engine.getProtocolHandler().onPacketWrite(packet);
+		int protocolCompressionThreshold = TaurusPermanent.getInstance().getConfig().protocolCompression;
+		byte[] binData = ((TObject)packet.getData()).toBinary();
+		boolean compression = binData.length > protocolCompressionThreshold;
+		if(compression) {
+			binData = Utils.compress(binData);
+		}
+		ByteBuffer packetBuffer = ByteBuffer.allocate(INT_SIZE + 1 + binData.length);
+		packetBuffer.put(compression?(byte)1:(byte)0);
+		packetBuffer.putInt(binData.length);
+		packetBuffer.put(binData);
+		packet.setData(packetBuffer.array());
 		engine.getSocketWriter().enqueuePacket(packet);
 	}
 
@@ -86,7 +97,10 @@ public class BinaryIoHandler {
 	}
 
 	private ProcessedPacket handleNewPacket(Session session, byte[] data) {
-		session.setSystemProperty(Session.DATA_BUFFER, new PendingPacket());
+		PendingPacket pp = new PendingPacket();
+		pp.compressed = data[0] > 0;
+		session.setSystemProperty(Session.DATA_BUFFER, pp);
+		data = Utils.resizeByteArray(data, 1, data.length - 1);
 		return new ProcessedPacket(PacketReadState.WAIT_DATA_SIZE, data);
 	}
 
@@ -162,49 +176,19 @@ public class BinaryIoHandler {
 			dataBuffer.put(data, 0, readLen);
 
 			if (pending.getExpectedLen() != dataBuffer.capacity()) {
-				throw new Exception("Expected: " + pending.getExpectedLen() + ", Buffer size: " + dataBuffer.capacity());
-			}
-
-			this.packetsRead += 1L;
-			dispatchRequest(session, dataBuffer.array());
-
-			state = PacketReadState.WAIT_NEW_PACKET;
-
-		} else {
-			dataBuffer.put(data);
-		}
-
-		if (isThereMore)
-			data = Utils.resizeByteArray(data, readLen, data.length - readLen);
-		else {
-			data = new byte[0];
-		}
-		return new ProcessedPacket(state, data);
-	}
-
-	
-	private ProcessedPacket dispatchRequest(Session session, byte[] data) {
-		PacketReadState state = PacketReadState.WAIT_DATA;
-		PendingPacket pending = (PendingPacket) session.getSystemProperty(Session.DATA_BUFFER);
-		ByteBuffer dataBuffer = (ByteBuffer) pending.getBuffer();
-
-		int readLen = dataBuffer.remaining();
-
-		boolean isThereMore = data.length > readLen;
-
-		if (data.length >= readLen) {
-			dataBuffer.put(data, 0, readLen);
-
-			if (pending.getExpectedLen() != dataBuffer.capacity()) {
 				throw new IllegalStateException("Expected: " + pending.getExpectedLen() + ", Buffer size: " + dataBuffer.capacity());
 			}
+			byte[] tembytes = dataBuffer.array();
+			this.packetsRead += 1L;
+			if(pending.compressed) {
+				tembytes = Utils.uncompress(tembytes);
+			}
 			this.packetsRead += 1L;
 			state = PacketReadState.WAIT_NEW_PACKET;
-			
+			ITObject requestObject = TObject.newFromBinaryData(tembytes);
 			Packet newPacket = new Packet();
 			newPacket.setSender(session);
-//			newPacket.setOriginalSize(dataBuffer.capacity());
-			newPacket.setData(dataBuffer);
+			newPacket.setData(requestObject);
 			
 			this.systemTreadPool.execute(new Runnable() {
 				@Override
@@ -212,6 +196,9 @@ public class BinaryIoHandler {
 					engine.getProtocolHandler().onPacketRead(newPacket);
 				}
 			});
+
+			state = PacketReadState.WAIT_NEW_PACKET;
+
 		} else {
 			dataBuffer.put(data);
 		}
@@ -237,11 +224,11 @@ public class BinaryIoHandler {
 			throw new IllegalArgumentException("Illegal request size: " + dataSize + " bytes, from: " + who);
 		}
 
-		if (dataSize > this.maxIncomingPacketSize) {
+		if (dataSize > this.maxPacketSize) {
 			TaurusPermanent.getInstance().getController().disconnect(session);
 			this.droppedIncomingPackets += 1L;
 
-			throw new IllegalArgumentException(String.format("Incoming request size too large: %s, Current limit: %s, From: %s", dataSize, this.maxIncomingPacketSize, who));
+			throw new IllegalArgumentException(String.format("Incoming request size too large: %s, Current limit: %s, From: %s", dataSize, this.maxPacketSize, who));
 		}
 	}
 

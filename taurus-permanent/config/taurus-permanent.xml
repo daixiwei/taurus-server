@@ -2,13 +2,13 @@
 	<!-- 计时器线程池大小-->
 	<timerThreadPoolSize>4</timerThreadPoolSize>
 	<!-- 协议包压缩门槛 （单位字节），当协议包大于设定的值则会进行压缩 -->
-	<protocolCompressionThreshold>1024</protocolCompressionThreshold>
+	<protocolCompression>512</protocolCompression>
 	<!-- 读缓冲区类型  nio  Direct Buffer  或者  Heap Buffer-->
 	<readBufferType>Heap</readBufferType>
 	<!-- 写入冲区类型  nio  Direct Buffer  或者  Heap Buffer-->
 	<writeBufferType>Heap</writeBufferType>
 	<!-- 最大的数据包大小 -->
-	<maxIncomingRequestSize>524288</maxIncomingRequestSize>
+	<maxPacketSize>524288</maxPacketSize>
 	<!-- 最大读取缓存大小 -->
 	<maxReadBufferSize>1024</maxReadBufferSize>
 	<!-- 最大写入缓存大小 -->
@@ -23,12 +23,8 @@
 	
 	<!-- Enable disable Nagle algorithm on sockets, true == disable -->
 	<tcpNoDelay>true</tcpNoDelay>
-	<useDebugMode>true</useDebugMode>
-	<!-- 会话最大空闲时间(单位秒)-->
-	<sessionMaxIdleTime>5</sessionMaxIdleTime>
-	<!-- 用户最大空闲时间 (单位秒)-->
-	<userMaxIdleTime>15</userMaxIdleTime>
-	<ghostHunterEnabled>true</ghostHunterEnabled>
+	<!-- 会话超时时间(单位秒)-->
+	<sessionTimeout>15</sessionTimeout>
 	
 	<!-- Bind socket addresses -->
 	<socketAddresses>
@@ -46,15 +42,15 @@
 		<maxConnectionsPerAddress>10000</maxConnectionsPerAddress>
 	</ipFilter>
 	
-	<webServer>
+	<webSocket>
 	    <isActive>true</isActive>
-	</webServer>
+	</webSocket>
 	
 	<!-- Main extension class -->
-	<controllerSettings>
+	<extensionConfig>
 		<name>extension - test </name>
 		<className>com.taurus.TestExtension</className>
-	</controllerSettings>
+	</extensionConfig>
 
 	<!-- The system thread pool config -->
 	<systemThreadPoolConfig>

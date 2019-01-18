@@ -15,8 +15,12 @@ public class NormalSocketChannel implements ISocketChannel{
 		this.channel = channel;
 	}
 	@Override
-	public long write(ByteBuffer buffer) throws IOException {
-		return channel.write(buffer);
+	public long write(ByteBuffer buffer) {
+		try {
+			return channel.write(buffer);
+		} catch (IOException e) {
+			return 0;
+		}
 	}
 
 	@Override
@@ -29,18 +33,7 @@ public class NormalSocketChannel implements ISocketChannel{
 	public SocketAddress getRemoteAddress() {
 		if(checkConnection()) {
 			return channel.socket().getRemoteSocketAddress();
-//			String hostAddr = channel.socket().getRemoteSocketAddress().toString().substring(1);
-//			String[] adr = hostAddr.split("\\:");
-//			this.clientIpAddress = adr[0];
-//			try {
-//				this.clientPort = Integer.parseInt(adr[1]);
-//			} catch (NumberFormatException localNumberFormatException) {
-//			}
-//			this.connected = true;
 		}
-//		else {
-//			this.clientIpAddress = "[unknown]";
-//		}
 		return null;
 	}
 

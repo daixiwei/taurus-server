@@ -5,9 +5,9 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 public interface ISocketChannel{
-	long write(ByteBuffer buffer) throws IOException;
+	long write(ByteBuffer buffer);
 	    
-    void write(final String p0) throws IOException;
+    void write(final String p0);
 	
     boolean checkConnection();
     

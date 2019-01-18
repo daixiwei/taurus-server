@@ -15,7 +15,8 @@ import java.nio.ByteBuffer;
 public class ByteArray {
 	private byte[]	buffer;
 	private int		position;
-
+	private boolean compressed;
+	
 	public ByteArray() {
 		position = 0;
 		buffer = new byte[0];
@@ -222,7 +223,38 @@ public class ByteArray {
 	public void setPosition(int position) {
 		this.position = position;
 	}
-
+	
+	public boolean isCompressed() {
+        return this.compressed;
+    }
+    
+    public void setCompressed(final boolean compressed) {
+        this.compressed = compressed;
+    }
+    
+	public void compress() throws Exception {
+        if (this.compressed) {
+            throw new Exception("Buffer is already compressed");
+        }
+        try {
+        	buffer = Utils.compress(this.buffer);
+            this.position = 0;
+            this.compressed = true;
+        }catch (IOException e) {
+            throw new Exception("Error compressing data");
+        }
+    }
+    
+    public void uncompress() throws Exception {
+        try {
+        	buffer = Utils.uncompress(this.buffer);
+            this.position = 0;
+            this.compressed = false;
+        }catch (IOException e2) {
+            throw new Exception("Error decompressing data");
+        }
+    }
+    
 	public int getBytesAvailable() {
 		int val = this.buffer.length - this.position;
 		if ((val > this.buffer.length) || (val < 0)) {

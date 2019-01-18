@@ -1,21 +1,19 @@
 package com.taurus.permanent.webscoket;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
+import com.taurus.core.entity.ITObject;
+import com.taurus.core.entity.TObject;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
-import com.taurus.permanent.data.IPacketQueue;
+import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.data.ISocketChannel;
 import com.taurus.permanent.data.PackDataType;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
-import com.taurus.permanent.data.SessionManager;
 import com.taurus.permanent.data.SessionType;
 
 import io.undertow.Handlers;
@@ -26,22 +24,24 @@ import io.undertow.websockets.core.BufferedBinaryMessage;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.CloseMessage;
 import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 
+/**
+ * WebSocket service
+ * @author daixiwei
+ *
+ */
 public class WebSocketService extends BaseCoreService{
 	private Undertow server;
 	private final BitSwarmEngine	engine;
 	private SessionManager sessionManager;
 	private TaurusExecutor systemExecutor;
-	private final BlockingQueue<Session>	sessionTicketsQueue;
 	private Logger logger;
 	
 	public WebSocketService() {
 		engine = BitSwarmEngine.getInstance();
 		sessionManager = engine.getSessionManager();
 		systemExecutor = TaurusPermanent.getInstance().getSystemExecutor();
-		sessionTicketsQueue = new LinkedBlockingQueue<Session>();
 		logger = Logger.getLogger(WebSocketService.class);
 	}
 	
@@ -52,12 +52,14 @@ public class WebSocketService extends BaseCoreService{
 				.setHandler(Handlers.path().addPrefixPath("/websocket", Handlers.websocket(listener)))
 				.build();
 		server.start();
+		logger.info("Websocket service start!");
 	}
 	
 	public void destroy(Object o) {
 		super.destroy(o);
 		server.stop();
 		server = null;
+		logger.info("Websocket service shutdown!");
 	}
 	
 	private void openAction(WebSocketChannel channel) {
@@ -70,9 +72,9 @@ public class WebSocketService extends BaseCoreService{
 		Packet newPacket = new Packet();
 		newPacket.setDataType(PackDataType.TEXT);
 		newPacket.setSender(session);
-		newPacket.setData(data);
+		ITObject requestObject = TObject.newFromJsonData(data);
+		newPacket.setData(requestObject);
 		systemExecutor.execute(new Runnable() {
-			
 			@Override
 			public void run() {
 				engine.getProtocolHandler().onPacketRead(newPacket);
@@ -87,14 +89,10 @@ public class WebSocketService extends BaseCoreService{
 		if (packet.getRecipients().size() > 0) {
 			packet.setDataType(PackDataType.TEXT);
 			engine.getProtocolHandler().onPacketWrite(packet);
+			String msg = ((ITObject)packet.getData()).toJson();
 			for (final Session session : packet.getRecipients()) {
 	            final ISocketChannel channel = session.getConnection();
-	            try {
-					channel.write((String)packet.getData());
-				} catch (IOException e) {
-					logger.error("Websocket write data exception!",e);
-					continue;
-				}
+				channel.write(msg);
 	        }
 		}
 	}
@@ -135,7 +133,6 @@ public class WebSocketService extends BaseCoreService{
 		@Override
 		protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
 			wsService.readTextAction(channel, message.getData());
-//			WebSockets.sendText(message.getData(), channel, null);
 		}
 		
 		protected void onCloseMessage(CloseMessage cm, WebSocketChannel channel) {

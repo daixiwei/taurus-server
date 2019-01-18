@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -185,6 +184,7 @@ public final class SocketWriter extends BaseCoreService implements Runnable {
 		long toWrite = writeBuffer.remaining();
 		
 		long bytesWritten = channel.write(writeBuffer);
+		if(bytesWritten == 0)throw new IOException("Written Bytes excetion!");
 		
 		writtenBytes += bytesWritten;
 		session.addWrittenBytes(bytesWritten);

@@ -10,5 +10,5 @@ public interface IEventListener {
 	 * 
 	 * @param event
 	 */
-	public void handleEvent(IEvent event);
+	public void handleEvent(Event event);
 }

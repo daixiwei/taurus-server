@@ -4,11 +4,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 
- * @author daixiwei
- *
+ * Event.
+ * @author daixiwei daixiwei15@126.com
  */
-public class Event implements IEvent {
+public class Event {
+	
 	protected Object				target;
 	protected String				name;
 	protected Map<String, Object>	params;
