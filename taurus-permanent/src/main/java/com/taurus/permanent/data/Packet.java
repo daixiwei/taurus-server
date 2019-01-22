@@ -12,7 +12,6 @@ public class Packet {
 	protected int							id;
 	protected Object						data;
 	protected Session						sender;
-//	protected int							originalSize	= -1;
 	protected Collection<Session>			recipients;
 	protected byte[]						fragmentBuffer;
 	protected PackDataType					dataType = PackDataType.BINARY;
@@ -61,15 +60,6 @@ public class Packet {
 		return this.fragmentBuffer != null;
 	}
 	
-//	public int getOriginalSize() {
-//		return this.originalSize;
-//	}
-//	
-//	public void setOriginalSize(int originalSize) {
-//		if (this.originalSize == -1)
-//			this.originalSize = originalSize;
-//	}
-	
 	public byte[] getFragmentBuffer() {
 		return this.fragmentBuffer;
 	}
@@ -92,8 +82,8 @@ public class Packet {
 	
 	public Packet clone() {
 		Packet newPacket = new Packet();
-		newPacket.setData(getData());
-//		newPacket.setOriginalSize(getOriginalSize());
+		newPacket.id = this.id;
+		newPacket.data = data;
 		List<Session> recipients = new ArrayList<Session>();
 		recipients.addAll(this.recipients);
 		newPacket.recipients = recipients;

@@ -354,7 +354,7 @@ public final class Session {
 			this.lastActivityTime = timestamp;
 		}
 	}
-
+	
 	/**
 	 * 设置最后写网络字节时间
 	 * @param timestamp
@@ -364,6 +364,10 @@ public final class Session {
 		if(this.hashId!=null) {
 			this.lastActivityTime = timestamp;
 		}
+	}
+	
+	public void updateLastActivityTime() {
+		this.lastActivityTime = System.currentTimeMillis();
 	}
 
 	/**

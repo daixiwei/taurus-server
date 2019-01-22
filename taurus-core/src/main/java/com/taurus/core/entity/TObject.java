@@ -247,13 +247,13 @@ public class TObject implements ITObject {
 	
 	private void putObj(String key, Object value, TDataType typeId) {
 		if (key == null) {
-			throw new IllegalArgumentException("MPObject requires a non-null key for a 'put' operation!");
+			throw new IllegalArgumentException("TObject requires a non-null key for a 'put' operation!");
 		}
 		if (key.length() > 255) {
-			throw new IllegalArgumentException("MPObject keys must be less than 255 characters!");
+			throw new IllegalArgumentException("TObject keys must be less than 255 characters!");
 		}
 		if (value == null) {
-			throw new IllegalArgumentException("MPObject requires a non-null value! If you need to add a null use the putNull() method.");
+			throw new IllegalArgumentException("TObject requires a non-null value! If you need to add a null use the putNull() method.");
 		}
 		if ((value instanceof TDataWrapper))
 			dataHolder.put(key, (TDataWrapper) value);

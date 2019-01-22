@@ -66,7 +66,7 @@ public class TRequest {
 		resObj.putInt(SystemController.REQUEST_RESULT, result);
 		resObj.putInt(SystemController.REQUEST_GID, gid);
 		if (params != null) {
-			resObj.putString(SystemController.REQUEST_PARM, params.toJson());
+			resObj.putTObject(SystemController.REQUEST_PARM, params);
 		}
 		Packet packet = new Packet();
 		packet.setId(SystemController.ACTION_REQUST_CMD);

@@ -148,6 +148,7 @@ public class SystemController implements IService {
 		parm.putString(CONNECT_TOKE, __getUniqueSessionToken(sender));
 		parm.putInt(CONNECT_PROT_COMPRESSION, taurus.getConfig().protocolCompression);
 		sender.setHashId(token);
+		sender.updateLastActivityTime();
 		Packet packet = new Packet();
 		packet.setId(ACTION_HANDSHAKE);
 		packet.setRecipient(sender);
@@ -170,8 +171,7 @@ public class SystemController implements IService {
 			gid = parm.getInt(REQUEST_GID);
 		ITObject p = null;
 		if (parm.containsKey(REQUEST_PARM)) {
-			String json = parm.getString(REQUEST_PARM);
-			p = TObject.newFromJsonData(json);
+			p = parm.getTObject(REQUEST_PARM);
 		}
 		TRequest tqp = new TRequest(key,sender, gid,p);
 		action.getMethod().invoke(controller,tqp);

@@ -1,14 +1,17 @@
 package com.taurus.permanent.webscoket;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.util.Logger;
+import com.taurus.core.util.Utils;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
+import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.data.ISocketChannel;
 import com.taurus.permanent.data.PackDataType;
@@ -24,6 +27,7 @@ import io.undertow.websockets.core.BufferedBinaryMessage;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.CloseMessage;
 import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 
 /**
@@ -74,6 +78,7 @@ public class WebSocketService extends BaseCoreService{
 		newPacket.setSender(session);
 		ITObject requestObject = TObject.newFromJsonData(data);
 		newPacket.setData(requestObject);
+		session.setLastReadTime(System.currentTimeMillis());
 		systemExecutor.execute(new Runnable() {
 			@Override
 			public void run() {
@@ -82,17 +87,41 @@ public class WebSocketService extends BaseCoreService{
 		});
 	}
 	
+	private void readBinaryAction(WebSocketChannel channel,ByteBuffer data) {
+		Session session = sessionManager.getSessionByConnection(channel);
+		Packet newPacket = new Packet();
+		newPacket.setDataType(PackDataType.BINARY);
+		byte[] bytes = new byte[data.remaining()];
+		data.get(bytes);
+		newPacket.setSender(session);
+		ITObject requestObject = TObject.newFromBinaryData(bytes);
+		newPacket.setData(requestObject);
+		session.setLastReadTime(System.currentTimeMillis());
+		systemExecutor.execute(new Runnable() {
+			@Override
+			public void run() {
+				engine.getProtocolHandler().onPacketRead(newPacket);
+			}
+		});
+	}
+	
+	
 	/**
 	 * send packet
 	 */
 	public void onDataWrite(Packet packet) {
 		if (packet.getRecipients().size() > 0) {
-			packet.setDataType(PackDataType.TEXT);
+			packet.setDataType(PackDataType.BINARY);
 			engine.getProtocolHandler().onPacketWrite(packet);
-			String msg = ((ITObject)packet.getData()).toJson();
+			byte[] msg = ((ITObject)packet.getData()).toBinary();
+			ServerConfig setting = TaurusPermanent.getInstance().getConfig();
+			ByteBuffer writeBuffer = Utils.allocateBuffer(msg.length, setting.writeBufferType);
+			writeBuffer.put(msg);
+			writeBuffer.flip();
 			for (final Session session : packet.getRecipients()) {
+				session.setLastWriteTime(System.currentTimeMillis());
 	            final ISocketChannel channel = session.getConnection();
-				channel.write(msg);
+	            WebSockets.sendBinary(writeBuffer, (WebSocketChannel)channel.getChannel(), null);
 	        }
 		}
 	}
@@ -134,7 +163,8 @@ public class WebSocketService extends BaseCoreService{
 		protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
 			wsService.readTextAction(channel, message.getData());
 		}
-		
+
+
 		protected void onCloseMessage(CloseMessage cm, WebSocketChannel channel) {
 			int code = cm.getCode();
 			System.out.println("code:"+code);
@@ -146,7 +176,14 @@ public class WebSocketService extends BaseCoreService{
 	    }
 
 	    protected void onFullBinaryMessage(final WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
-	    	super.onFullBinaryMessage(channel, message);
+	    	
+	    	ByteBuffer[] bufferList= message.getData().getResource();
+	    	for (ByteBuffer tem : bufferList) {
+	    		wsService.readBinaryAction(channel, tem);
+			}
+	    	message.getData().free();
+//	    	tem[0].
+//	    	System.out.println(tem[0].toString());
 	    }
 		
 	}
