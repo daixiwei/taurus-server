@@ -22,7 +22,7 @@ import com.taurus.permanent.io.ProtocolHandler;
 import com.taurus.permanent.normal.SocketAcceptor;
 import com.taurus.permanent.normal.SocketReader;
 import com.taurus.permanent.normal.SocketWriter;
-import com.taurus.permanent.webscoket.WebSocketService;
+import com.taurus.permanent.websocket.WebSocketService;
 
 /**
  * 核心网络字节群处理类

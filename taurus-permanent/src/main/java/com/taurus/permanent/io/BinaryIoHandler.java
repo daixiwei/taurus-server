@@ -1,6 +1,5 @@
 package com.taurus.permanent.io;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.taurus.core.entity.ITObject;

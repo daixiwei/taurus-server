@@ -1,4 +1,4 @@
-package com.taurus.permanent.webscoket;
+package com.taurus.permanent.websocket;
 
 import java.io.IOException;
 import java.net.SocketAddress;
