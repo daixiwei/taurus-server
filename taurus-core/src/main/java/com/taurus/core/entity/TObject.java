@@ -20,15 +20,15 @@ public class TObject implements ITObject {
 	private boolean						isChange;
 	
 	public static ITObject newFromBinaryData(byte[] bytes) {
-		return TDataSerializer.getInstance().binary2object(bytes);
+		return TDataSerializer.me().binary2object(bytes);
 	}
 	
 	public static ITObject newFromJsonData(String jsonStr) {
-		return TDataSerializer.getInstance().json2object(jsonStr);
+		return TDataSerializer.me().json2object(jsonStr);
 	}
 	
 	public static ITObject newFromResultSet(ResultSet rs) throws SQLException{
-		return TDataSerializer.getInstance().resultSet2object(rs);
+		return TDataSerializer.me().resultSet2object(rs);
 	}
 	
 	public static TObject newInstance() {
@@ -56,11 +56,11 @@ public class TObject implements ITObject {
 	}
 	
 	public byte[] toBinary() {
-		return TDataSerializer.getInstance().object2binary(this);
+		return TDataSerializer.me().object2binary(this);
 	}
 	
 	public String toJson() {
-		return TDataSerializer.getInstance().object2json(flatten());
+		return TDataSerializer.me().object2json(flatten());
 	}
 	
 	public boolean isNull(String key) {
@@ -176,7 +176,7 @@ public class TObject implements ITObject {
 		if (o == null) {
 			return null;
 		}
-		return Integer.valueOf(TDataSerializer.getInstance().getUByte(((Byte) o.getObject()).byteValue()));
+		return Integer.valueOf(TDataSerializer.me().getUByte(((Byte) o.getObject()).byteValue()));
 	}
 	
 	public String getString(String key) {
@@ -270,7 +270,7 @@ public class TObject implements ITObject {
 	
 	private Map<String, Object> flatten() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		TDataSerializer.getInstance().flattenObject(map, this);
+		TDataSerializer.me().flattenObject(map, this);
 		return map;
 	}
 

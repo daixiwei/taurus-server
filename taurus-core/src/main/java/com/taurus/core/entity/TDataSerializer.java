@@ -32,7 +32,7 @@ public class TDataSerializer {
 
 	private static Logger			logger				= Logger.getLogger(TDataSerializer.class);
 
-	public static TDataSerializer getInstance() {
+	public static TDataSerializer me() {
 		return instance;
 	}
 
@@ -101,24 +101,20 @@ public class TDataSerializer {
 			throw new IllegalStateException("Can't decode TObject. Size is negative = " + size);
 		}
 
-		try {
-			for (int i = 0; i < size; i++) {
-				short keySize = buffer.getShort();
-				if ((keySize < 0) || (keySize > 255)) {
-					throw new IllegalStateException("Invalid TObject key length. Found = " + keySize);
-				}
-				byte[] keyData = new byte[keySize];
-				buffer.get(keyData, 0, keyData.length);
-				String key = new String(keyData);
-				TDataWrapper decodedObject = decodeObject(buffer);
-				if (decodedObject != null)
-					tobj.put(key, decodedObject);
-				else {
-					throw new IllegalStateException("Could not decode value for key: " + keyData);
-				}
+		for (int i = 0; i < size; i++) {
+			short keySize = buffer.getShort();
+			if ((keySize < 0) || (keySize > 255)) {
+				throw new IllegalStateException("Invalid TObject key length. Found = " + keySize);
 			}
-		} catch (RuntimeException codecError) {
-			throw new IllegalArgumentException(codecError.getMessage());
+			byte[] keyData = new byte[keySize];
+			buffer.get(keyData, 0, keyData.length);
+			String key = new String(keyData);
+			TDataWrapper decodedObject = decodeObject(buffer);
+			if (decodedObject != null)
+				tobj.put(key, decodedObject);
+			else {
+				throw new IllegalStateException("Could not decode value for key: " + keyData);
+			}
 		}
 		return tobj;
 	}

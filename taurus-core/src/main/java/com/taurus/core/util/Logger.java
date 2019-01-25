@@ -66,62 +66,62 @@ public class Logger {
         	print.println("\tat " + traceElement);
 	}
 	
-	protected void print(LoggerLevel level,String str,Throwable throwable){
+	protected void print(LoggerLevel level,Object msg,Throwable throwable){
         Calendar calendar = Calendar.getInstance();  
 		calendar.setTime(new Date());  
 	    String date = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(calendar.getTime()); 
-	    str = StringUtil.isEmpty(str)?NULL:str;
-        str = String.format("%s  %-5s  [%s] %s    -%s", date, level.name(),Thread.currentThread().getName(), _name, str);
-        System.out.println(str);
+	    msg = StringUtil.isEmpty(msg.toString())?NULL:msg;
+        msg = String.format("%s  %-5s  [%s] %s    -%s", date, level.name(),Thread.currentThread().getName(), _name, msg);
+        System.out.println(msg);
         if(throwable!=null) {
         	printThrowable(System.out,throwable);
         }
     }
 	
-	public void trace(String msg) {
+	public void trace(Object msg) {
 		print(LoggerLevel.TRACE,msg,null);
 	}
 
-	public void trace(String msg, Object... params) {
-		String str = String.format(msg, params);
+	public void trace(Object msg, Object... params) {
+		String str = String.format(msg.toString(), params);
 		trace(str);
 	}
 
-	public void debug(String msg) {
+	public void debug(Object msg) {
 		print(LoggerLevel.DEBUG,msg,null);
 	}
 
-	public void debug(String msg, Object... params) {
-		String str = String.format(msg, params);
+	public void debug(Object msg, Object... params) {
+		String str = String.format(msg.toString(), params);
 		debug(str);
 	}
 
-	public void info(String msg) {
+	public void info(Object msg) {
 		print(LoggerLevel.INFO,msg,null);
 	}
 
-	public void info(String msg, Object... params) {
-		String str = String.format(msg, params);
+	public void info(Object msg, Object... params) {
+		String str = String.format(msg.toString(), params);
 		info(str);
 	}
 
 
-	public void warn(String msg) {
+	public void warn(Object msg) {
 		print(LoggerLevel.WARN, msg,null);
 	}
 
-	public void warn(String msg, Object... params) {
-		String str = String.format(msg, params);
+	public void warn(Object msg, Object... params) {
+		String str = String.format(msg.toString(), params);
 		warn(str);
 	}
 
 
-	public void error(String msg) {
+	public void error(Object msg) {
 		print(LoggerLevel.ERROR,msg,null);
 	}
 	
-	public void error(String msg, Object... params) {
-		String str = String.format(msg, params);
+	public void error(Object msg, Object... params) {
+		String str = String.format(msg.toString(), params);
 		error(str);
 	}
 	
@@ -129,7 +129,7 @@ public class Logger {
 		error(NULL,throwable);
 	}
 	
-	public void error(String msg, Throwable throwable) {
+	public void error(Object msg, Throwable throwable) {
 		print(LoggerLevel.ERROR,msg,throwable);
 	}
 	
@@ -160,22 +160,22 @@ public class Logger {
 		}
 		
 		@Override
-		protected void print(LoggerLevel level,String str,Throwable throwable){
+		protected void print(LoggerLevel level,Object msg,Throwable throwable){
 			switch (level) {
 			case DEBUG:
-				logger.debug(str);
+				logger.debug(msg);
 				break;
 			case ERROR:
-				logger.error(str,throwable);
+				logger.error(msg,throwable);
 				break;
 			case WARN:
-				logger.warn(str);
+				logger.warn(msg);
 				break;
 			case TRACE:
-				logger.trace(str);
+				logger.trace(msg);
 				break;
 			case INFO:
-				logger.info(str);
+				logger.info(msg);
 				break;
 			}
 		}

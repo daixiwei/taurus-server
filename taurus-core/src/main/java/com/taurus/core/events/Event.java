@@ -11,7 +11,7 @@ public class Event {
 	
 	protected Object				target;
 	protected String				name;
-	protected Map<String, Object>	params;
+	protected Map<String, Object>	paramMap;
 	
 	public Event(String name) {
 		this.name = name;
@@ -39,22 +39,22 @@ public class Event {
 	}
 	
 	public Object getParameter(String key) {
-		Object param = null;
+		Object tem = null;
 		
-		if (params != null) {
-			param = params.get(key);
+		if (paramMap != null) {
+			tem = paramMap.get(key);
 		}
-		return param;
+		return tem;
 	}
 	
 	public void setParameter(String key, Object value) {
-		if (params == null) {
-			params = new ConcurrentHashMap<String, Object>();
+		if (paramMap == null) {
+			paramMap = new ConcurrentHashMap<String, Object>();
 		}
-		params.put(key, value);
+		paramMap.put(key, value);
 	}
 	
 	public String toString() {
-		return "Event { Name:" + name + ", Source: " + target + ", Params: " + params + " }";
+		return "Event { Name:" + name + ", Source: " + target + ", Params: " + paramMap + " }";
 	}
 }

@@ -181,7 +181,7 @@ public final class Utils {
     public static byte[] compress(byte[] data) throws IOException{  
         byte[] output = new byte[0];  
 
-        Deflater compresser = new Deflater(Deflater.BEST_COMPRESSION,true);  
+        Deflater compresser = new Deflater(Deflater.BEST_COMPRESSION,false);  
         compresser.reset();  
         compresser.setInput(data);  
         compresser.finish();  
@@ -210,7 +210,7 @@ public final class Utils {
      * @throws IOException
      */
     public static void compress(byte[] data, OutputStream os) throws IOException {  
-    	Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION, true);
+    	Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION, false);
         DeflaterOutputStream dos = new DeflaterOutputStream(os,deflater);  
         dos.write(data, 0, data.length);  
         dos.finish();  
@@ -238,7 +238,7 @@ public final class Utils {
     public static byte[] uncompress(byte[] data) throws IOException {  
         byte[] output = new byte[0];  
 
-        Inflater decompresser = new Inflater(true);  
+        Inflater decompresser = new Inflater(false);  
         decompresser.reset();  
         decompresser.setInput(data);  
 

@@ -20,15 +20,15 @@ public class TArray implements ITArray {
 	}
 
 	public static ITArray newFromBinaryData(byte[] bytes) {
-		return TDataSerializer.getInstance().binary2array(bytes);
+		return TDataSerializer.me().binary2array(bytes);
 	}
 
 	public static ITArray newFromJsonData(String jsonStr) {
-		return TDataSerializer.getInstance().json2array(jsonStr);
+		return TDataSerializer.me().json2array(jsonStr);
 	}
 
 	public static ITArray newFromResultSet(ResultSet rs) throws SQLException {
-		return TDataSerializer.getInstance().resultSet2array(rs);
+		return TDataSerializer.me().resultSet2array(rs);
 	}
 
 	public static TArray newInstance() {
@@ -36,11 +36,11 @@ public class TArray implements ITArray {
 	}
 
 	public byte[] toBinary() {
-		return TDataSerializer.getInstance().array2binary(this);
+		return TDataSerializer.me().array2binary(this);
 	}
 
 	public String toJson() {
-		return TDataSerializer.getInstance().array2json(flatten());
+		return TDataSerializer.me().array2json(flatten());
 	}
 
 	public boolean isNull(int index) {
@@ -68,7 +68,7 @@ public class TArray implements ITArray {
 
 	public Integer getUByte(int index) {
 		TDataWrapper wrapper = (TDataWrapper) this.dataHolder.get(index);
-		return wrapper != null ? Integer.valueOf(TDataSerializer.getInstance().getUByte(((Byte) wrapper.getObject()).byteValue())) : null;
+		return wrapper != null ? Integer.valueOf(TDataSerializer.me().getUByte(((Byte) wrapper.getObject()).byteValue())) : null;
 	}
 
 	public Short getShort(int index) {
@@ -168,24 +168,6 @@ public class TArray implements ITArray {
 		this.dataHolder.add(wrappedObject);
 	}
 
-	public boolean contains(Object obj) {
-		if (((obj instanceof ITArray)) || ((obj instanceof ITObject))) {
-			throw new UnsupportedOperationException("IMPArray and IMPObject are not supported by this method.");
-		}
-		boolean found = false;
-
-		for (Iterator<TDataWrapper> iter = dataHolder.iterator(); iter.hasNext();) {
-			Object item = ((TDataWrapper) iter.next()).getObject();
-
-			if (!item.equals(obj))
-				continue;
-			found = true;
-			break;
-		}
-
-		return found;
-	}
-
 	public Object getAt(int index) {
 		Object item = null;
 		TDataWrapper wrapper = (TDataWrapper) dataHolder.get(index);
@@ -199,7 +181,7 @@ public class TArray implements ITArray {
 		return this.dataHolder.iterator();
 	}
 
-	public void removeAt(int index) {
+	public void del(int index) {
 		this.dataHolder.remove(index);
 	}
 
@@ -228,7 +210,7 @@ public class TArray implements ITArray {
 
 	private List<Object> flatten() {
 		List<Object> list = new ArrayList<Object>();
-		TDataSerializer.getInstance().flattenArray(list, this);
+		TDataSerializer.me().flattenArray(list, this);
 		return list;
 	}
 }

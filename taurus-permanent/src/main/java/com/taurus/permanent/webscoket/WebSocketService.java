@@ -11,7 +11,6 @@ import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
-import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.data.ISocketChannel;
 import com.taurus.permanent.data.PackDataType;
@@ -91,8 +90,17 @@ public class WebSocketService extends BaseCoreService{
 		Session session = sessionManager.getSessionByConnection(channel);
 		Packet newPacket = new Packet();
 		newPacket.setDataType(PackDataType.BINARY);
+		boolean compressed = data.get() >0;
 		byte[] bytes = new byte[data.remaining()];
 		data.get(bytes);
+		if(compressed) {
+			try {
+				bytes = Utils.uncompress(bytes);
+			} catch (IOException e) {
+				logger.error(e);
+				return;
+			}
+		}
 		newPacket.setSender(session);
 		ITObject requestObject = TObject.newFromBinaryData(bytes);
 		newPacket.setData(requestObject);
@@ -109,14 +117,24 @@ public class WebSocketService extends BaseCoreService{
 	/**
 	 * send packet
 	 */
-	public void onDataWrite(Packet packet) {
+	public void onDataWrite(Packet packet){
 		if (packet.getRecipients().size() > 0) {
 			packet.setDataType(PackDataType.BINARY);
 			engine.getProtocolHandler().onPacketWrite(packet);
-			byte[] msg = ((ITObject)packet.getData()).toBinary();
-			ServerConfig setting = TaurusPermanent.getInstance().getConfig();
-			ByteBuffer writeBuffer = Utils.allocateBuffer(msg.length, setting.writeBufferType);
-			writeBuffer.put(msg);
+			int protocolCompressionThreshold = TaurusPermanent.getInstance().getConfig().protocolCompression;
+			byte[] binData = ((TObject)packet.getData()).toBinary();
+			boolean compression = binData.length > protocolCompressionThreshold;
+			if(compression) {
+				try {
+					binData = Utils.compress(binData);
+				} catch (IOException e) {
+					logger.error(e);
+					return;
+				}
+			}
+			ByteBuffer writeBuffer = ByteBuffer.allocate(1 + binData.length);
+			writeBuffer.put(compression?(byte)1:(byte)0);
+			writeBuffer.put(binData);
 			writeBuffer.flip();
 			for (final Session session : packet.getRecipients()) {
 				session.setLastWriteTime(System.currentTimeMillis());
@@ -166,8 +184,6 @@ public class WebSocketService extends BaseCoreService{
 
 
 		protected void onCloseMessage(CloseMessage cm, WebSocketChannel channel) {
-			int code = cm.getCode();
-			System.out.println("code:"+code);
 	        wsService.closeAction(channel);
 	    }
 
@@ -176,14 +192,11 @@ public class WebSocketService extends BaseCoreService{
 	    }
 
 	    protected void onFullBinaryMessage(final WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
-	    	
 	    	ByteBuffer[] bufferList= message.getData().getResource();
 	    	for (ByteBuffer tem : bufferList) {
 	    		wsService.readBinaryAction(channel, tem);
 			}
 	    	message.getData().free();
-//	    	tem[0].
-//	    	System.out.println(tem[0].toString());
 	    }
 		
 	}

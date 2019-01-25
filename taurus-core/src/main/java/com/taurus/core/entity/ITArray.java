@@ -8,15 +8,12 @@ import java.util.Iterator;
  *
  */
 public interface ITArray {
-	public boolean contains(Object o);
 	
 	public Iterator<TDataWrapper> iterator();
-	
-	public Object getAt(int index);
-	
+
 	public TDataWrapper get(int index);
 	
-	public void removeAt(int index);
+	public void del(int index);
 	
 	public int size();
 	

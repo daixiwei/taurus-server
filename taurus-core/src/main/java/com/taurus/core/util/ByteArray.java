@@ -14,16 +14,16 @@ import java.nio.ByteBuffer;
  */
 public class ByteArray {
 	private byte[]	buffer;
-	private int		position;
+	private int		_position;
 	private boolean compressed;
 	
 	public ByteArray() {
-		position = 0;
+		_position = 0;
 		buffer = new byte[0];
 	}
 
 	public ByteArray(byte[] buf) {
-		position = 0;
+		_position = 0;
 		buffer = buf;
 	}
 
@@ -103,44 +103,36 @@ public class ByteArray {
 		writeBytes(reverseOrder(bos.toByteArray()));
 	}
 
-	public void writeUTF(String str) throws IOException {
-		int utfLen = 0;
-		for (int i = 0; i < str.length(); i++) {
-			int c = str.charAt(i);
-			if ((c >= 1) && (c <= 127)) {
-				utfLen++;
-			} else if (c > 2047) {
-				utfLen += 3;
-			} else {
-				utfLen += 2;
-			}
-		}
-		if (utfLen > 32768) {
-			throw new IOException("String length cannot be greater then 32768 !");
+	public void writeString(String str) throws IOException {
+		if(StringUtil.isEmpty(str)) {
+			writeInt(0);
+			return;
 		}
 		try {
-			writeUShort(utfLen);
-			writeBytes(StringUtil.getBytes(str));
+			byte[] bytes = StringUtil.getBytes(str);
+			int utfLen = bytes.length;
+			writeInt(utfLen);
+			writeBytes(bytes);
 		} catch (UnsupportedEncodingException e) {
 			throw new IOException("Error writing to data buffer");
 		}
 	}
 
 	public byte readByte() throws IOException {
-		return this.buffer[(this.position++)];
+		return this.buffer[(this._position++)];
 	}
 
 	public byte[] readBytes(int count) {
 		byte[] res = new byte[count];
 		ByteBuffer buf = ByteBuffer.wrap(this.buffer);
-		buf.position(this.position);
+		buf.position(this._position);
 		buf.get(res);
-		this.position += count;
+		this._position += count;
 		return res;
 	}
 
 	public boolean readBool() throws IOException {
-		return this.buffer[(this.position++)] == 1;
+		return this.buffer[(this._position++)] == 1;
 	}
 
 	public int readInt() throws IOException {
@@ -195,8 +187,8 @@ public class ByteArray {
 		return dis.readDouble();
 	}
 
-	public String readUTF() throws IOException {
-		int size = readUShort();
+	public String readString() throws IOException {
+		int size = readInt();
 		if (size == 0) {
 			return null;
 		}
@@ -204,24 +196,26 @@ public class ByteArray {
 		return StringUtil.getString(data);
 	}
 
-	public byte[] getBytes() {
+	public byte[] bytes() {
 		return this.buffer;
 	}
 
-	public void setBuffer(byte[] buffer) {
+	public ByteArray bytes(byte[] buffer) {
 		this.buffer = buffer;
+		return this;
 	}
 
-	public int getLength() {
+	public int length() {
 		return this.buffer.length;
 	}
 
-	public int getPosition() {
-		return this.position;
+	public int position() {
+		return this._position;
 	}
 
-	public void setPosition(int position) {
-		this.position = position;
+	public ByteArray position(int position) {
+		this._position = position;
+		return this;
 	}
 	
 	public boolean isCompressed() {
@@ -238,7 +232,7 @@ public class ByteArray {
         }
         try {
         	buffer = Utils.compress(this.buffer);
-            this.position = 0;
+            this._position = 0;
             this.compressed = true;
         }catch (IOException e) {
             throw new Exception("Error compressing data");
@@ -248,15 +242,15 @@ public class ByteArray {
     public void uncompress() throws Exception {
         try {
         	buffer = Utils.uncompress(this.buffer);
-            this.position = 0;
+            this._position = 0;
             this.compressed = false;
         }catch (IOException e2) {
             throw new Exception("Error decompressing data");
         }
     }
     
-	public int getBytesAvailable() {
-		int val = this.buffer.length - this.position;
+	public int bytesAvailable() {
+		int val = this.buffer.length - this._position;
 		if ((val > this.buffer.length) || (val < 0)) {
 			val = 0;
 		}
