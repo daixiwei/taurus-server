@@ -28,7 +28,7 @@ public class PluginService {
 	/**
 	 * get main instance
 	 */
-	public static PluginService getInstance() {
+	public static PluginService me() {
 		if (_instance == null) {
 			_instance = new PluginService();
 		}
