@@ -16,15 +16,22 @@ public abstract class Routes {
 	private static List<Routes> routesList = new ArrayList<Routes>();
 	private static Set<String> controllerKeySet = new HashSet<String>();
 	
-	private String baseViewPath = null;
 	private List<Route> routeItemList = new ArrayList<Route>();
 	
-	private boolean clearAfterMapping = true;
+	private Interceptor interceptor;
 	
 	/**
 	 * Implement this method to add route, add interceptor and set baseViewPath
 	 */
 	public abstract void config();
+	
+	/**
+	 * 设置拦截器
+	 * @param interceptor
+	 */
+	public void setInterceptor(Interceptor interceptor) {
+		this.interceptor = interceptor;
+	}
 	
 	/**
 	 * Add Routes
@@ -39,18 +46,10 @@ public abstract class Routes {
 	 * Add route
 	 * @param controllerKey A key can find controller
 	 * @param controller Controller Class
-	 * @param viewPath View path for this Controller
 	 */
-	public Routes add(String controllerKey, Controller controller) {
+	public Routes add(String controllerKey, Class<? extends Controller> controller) {
 		routeItemList.add(new Route(controllerKey, controller));
 		return this;
-	}
-
-	
-
-	
-	public String getBaseViewPath() {
-		return baseViewPath;
 	}
 	
 	public static List<Routes> getRoutesList() {
@@ -61,30 +60,15 @@ public abstract class Routes {
 		return routeItemList;
 	}
 	
-	/**
-	 * 配置是否在路由映射完成之后清除内部数据，以回收内存，默认值为 true.
-	 * 
-	 * 设置为 false 通常用于在系统启动之后，仍然要使用 Routes 的场景，
-	 * 例如希望拿到 Routes 生成用于控制访问权限的数据
-	 */
-	public void setClearAfterMapping(boolean clearAfterMapping) {
-		this.clearAfterMapping = clearAfterMapping;
-	}
-	
-	public void clear() {
-		if (clearAfterMapping) {
-			routesList = null;
-			controllerKeySet = null;
-			baseViewPath = null;
-			routeItemList = null;
-		}
+	public Interceptor getInterceptor() {
+		return interceptor;
 	}
 	
 	public static class Route {
 		private String controllerKey;
-		private Controller controller;
+		private Class<? extends Controller> controller;
 		
-		public Route(String controllerKey, Controller controller) {
+		public Route(String controllerKey, Class<? extends Controller> controller) {
 			if (StringUtil.isEmpty(controllerKey)) {
 				throw new IllegalArgumentException("controllerKey can not be blank");
 			}
@@ -111,7 +95,7 @@ public abstract class Routes {
 			return controllerKey;
 		}
 		
-		public Controller getController() {
+		public Class<? extends Controller> getController() {
 			return controller;
 		}
 		

@@ -95,7 +95,7 @@ public final class TaurusPermanent {
 
 		try {
 
-			PluginService.getInstance().loadConfig();
+			PluginService.me().loadConfig();
 			log.info("Load taurus-core config finish");
 
 			this.config = loadServerSettings();

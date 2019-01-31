@@ -11,6 +11,11 @@ import java.util.Map;
 import com.taurus.core.util.StringUtil;
 import com.taurus.permanent.core.Routes.Route;
 
+/**
+ * ActionMapping.
+ * @author daixiwei
+ *
+ */
 public class ActionMapping {
 	protected static final String SLASH = "/";
 	protected Routes routes;
@@ -32,7 +37,7 @@ public class ActionMapping {
 		mapping.clear();
 		for (Routes routes : getRoutesList()) {
 			for (Route route : routes.getRouteItemList()) {
-				Class<? extends Controller> controllerClass = route.getController().getClass();
+				Class<? extends Controller> controllerClass = route.getController();
 				
 				Method[] methods = controllerClass.getDeclaredMethods();
 				for (Method method : methods) {
@@ -45,7 +50,8 @@ public class ActionMapping {
 					String actionKey = ak.value().trim();
 					if (StringUtil.isEmpty(actionKey))
 						throw new IllegalArgumentException(controllerClass.getName() + "." + methodName + "(): The argument of ActionKey can not be blank.");
-					Action action = new Action(controllerKey, actionKey, route.getController(), method, methodName);
+					Interceptor interceptor = ak.validate()?routes.getInterceptor():null;
+					Action action = new Action(controllerKey, actionKey, route.getController(), method, methodName,interceptor);
 					
 					actionKey =StringUtil.isEmpty(controllerKey) ? actionKey : (controllerKey + SLASH+actionKey);
 					if (mapping.put(actionKey, action) != null) {
@@ -54,7 +60,6 @@ public class ActionMapping {
 				}
 			}
 		}
-		routes.clear();
 	}
 	
 	protected String buildMsg(String actionKey, Class<? extends Controller> controllerClass, Method method) {

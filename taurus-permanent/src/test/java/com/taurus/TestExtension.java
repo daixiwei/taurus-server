@@ -21,8 +21,8 @@ public class TestExtension extends Extension{
 
 	@Override
 	public void configRoute(Routes me) {
-		me.add("t1", new T1Controller());
-		me.add("t2", new T2Controller());
+		me.add("t1", T1Controller.class);
+		me.add("t2", T2Controller.class);
 	}
 	
 //	@Override

@@ -165,7 +165,7 @@ public class SystemController implements IService {
 			return;
 		}
 
-		Controller controller = action.getController();
+		Controller controller = action.getControllerClass().newInstance();
 		int gid = 0;
 		if (parm.containsKey(REQUEST_GID))
 			gid = parm.getInt(REQUEST_GID);
@@ -173,8 +173,13 @@ public class SystemController implements IService {
 		if (parm.containsKey(REQUEST_PARM)) {
 			p = parm.getTObject(REQUEST_PARM);
 		}
-		TRequest tqp = new TRequest(key,sender, gid,p);
-		action.getMethod().invoke(controller,tqp);
+		controller._init(key, sender, gid, p);
+		if(action.getInterceptor()!=null) {
+			action.getInterceptor().intercept(action, controller);
+		}else {
+			action.getMethod().invoke(controller);
+		}
+		
 	}
 
 	/**

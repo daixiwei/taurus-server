@@ -14,5 +14,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface ActionKey {
 	String value();
+	
+	boolean validate() default true;
 }
 
