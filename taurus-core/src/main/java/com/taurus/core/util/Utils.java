@@ -267,7 +267,7 @@ public final class Utils {
      * @throws IOException
      */
     public static byte[] uncompress(InputStream is) throws IOException {  
-    	Inflater decompresser = new Inflater(true); 
+    	Inflater decompresser = new Inflater(false); 
         InflaterInputStream iis = new InflaterInputStream(is,decompresser);  
         ByteArrayOutputStream o = new ByteArrayOutputStream(1024);  
         int i = 1024;  

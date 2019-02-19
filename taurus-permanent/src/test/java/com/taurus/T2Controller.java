@@ -10,4 +10,10 @@ public class T2Controller extends Controller{
 		System.out.println("t2 test");
 		this.sendResponse(1, this.getParm());
 	}
+	
+	@ActionKey("test1")
+	public void test1() {
+		System.out.println("t2 test");
+		this.sendResponse(1, this.getParm());
+	}
 }

@@ -1,5 +1,6 @@
 package com.taurus.core.plugin;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Collection;
@@ -76,7 +77,9 @@ public class PluginService {
 	 * @throws Exception
 	 */
 	public void loadConfig(String path) throws Exception{
-		InputStream is = new FileInputStream(path+"/"+CONFIG_PATH);
+		File file = new File(path+"/"+CONFIG_PATH);
+		if(!file.exists())return;
+		InputStream is = new FileInputStream(file);
 		SAXBuilder builder = new SAXBuilder();
 		Document document = builder.build(is);
 		Element root = document.getRootElement(); 
@@ -108,7 +111,6 @@ public class PluginService {
 			putPlugin(plugin);
 			logger.info("plugin["+plugin.getId()+"] load success!");
 		}
-		
 	}
 	
 	

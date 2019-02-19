@@ -62,10 +62,24 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isEmpty(String str) {
-		if ((str == null) || (Empty.equals(str.trim())) || str.length() == 0) {
+		if (str == null) {
 			return true;
 		}
-
+		int len = str.length();
+		if (len == 0) {
+			return true;
+		}
+		for (int i = 0; i < len; i++) {
+			switch (str.charAt(i)) {
+			case ' ':
+			case '\t':
+			case '\n':
+			case '\r':
+				break;
+			default:
+				return false;
+			}
+		}
 		return false;
 	}
 	
