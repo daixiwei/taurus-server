@@ -1,7 +1,6 @@
 
 package com.taurus.web;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
@@ -30,9 +29,7 @@ class JettyServer{
 	private WebAppContext webApp;
 
 	JettyServer(){
-		
 		this(DEFAULT_WEBAPPDIR,DEFAULT_PORT,"/");
-		System.out.println(detectWebRootPath());
 	}
 	
 	JettyServer(String webAppDir, int port, String context) {
@@ -49,15 +46,6 @@ class JettyServer{
 		this.webAppDir = webAppDir;
 		this.port = port;
 		this.context = context;
-	}
-	
-	private static String detectWebRootPath() {
-		try {
-			String path = JettyServer.class.getResource("/").toURI().getPath();
-			return new File(path).getParentFile().getParentFile().getCanonicalPath();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 	public void start() {
@@ -116,9 +104,6 @@ class JettyServer{
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
 	
 	private static boolean available(int port) {
 		if (port <= 0) {

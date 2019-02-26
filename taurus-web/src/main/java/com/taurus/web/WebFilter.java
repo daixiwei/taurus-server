@@ -29,7 +29,7 @@ public class WebFilter implements Filter {
 	static final String _Session = "$s";
 	static final String _Version = "$v";
 	
-//	private int					contextPathLength;
+	private int					contextPathLength;
 	private Extension			extension;
 	private ActionMapping		actionMapping;
 	public 	static int			forceVer	= 1;
@@ -43,8 +43,8 @@ public class WebFilter implements Filter {
 			System.setProperty("WORKDIR", path);
 			PluginService.me().loadConfig(path);
 			log = Logger.getLogger(WebFilter.class);
-//			String contextPath = filterConfig.getServletContext().getContextPath();
-//			contextPathLength = StringUtil.isNotEmpty(contextPath) ? contextPath.length() : 0;
+			String contextPath = filterConfig.getServletContext().getContextPath();
+			contextPathLength = StringUtil.isNotEmpty(contextPath) ? contextPath.length() : 0;
 			Routes routes = new Routes() {public void config() {}};
 			actionMapping = new ActionMapping(routes);
 			
@@ -88,9 +88,11 @@ public class WebFilter implements Filter {
 		if (StringUtil.isEmpty(target)) {
 			return;
 		}
-		
+		if (contextPathLength != 0) {
+			target = target.substring(contextPathLength);
+		}
 		request.setCharacterEncoding(_UTF8);
-
+		response.setCharacterEncoding(_UTF8);
 
 		Action action = actionMapping.getAction(target);
 

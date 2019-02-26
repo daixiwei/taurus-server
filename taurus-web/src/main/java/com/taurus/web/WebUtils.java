@@ -17,16 +17,11 @@ import com.taurus.core.util.Utils;
  *
  */
 public class WebUtils{
-	private static final String								_POST		= "POST";
 	static final String _Result = "$r";
 	static final String _Param = "$p";
 	
 	
 	static final ITObject httpRequest(HttpServletRequest request) throws IOException {
-		String method = request.getMethod();
-		if (!method.equals(_POST)) {
-			return null;
-		}
 		InputStream in = request.getInputStream();
 		byte[] bytes = Utils.uncompress(in);
 		ITObject obj = TObject.newFromBinaryData(bytes);

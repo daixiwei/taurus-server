@@ -517,7 +517,9 @@ public class TDataSerializer {
 		if (strLen < 0) {
 			throw new RuntimeException("Error decoding String. Negative size: " + strLen);
 		}
-
+		if(strLen == 0) {
+			return new TDataWrapper(TDataType.STRING, StringUtil.Empty);
+		}
 		byte[] strData = new byte[strLen];
 		buffer.get(strData, 0, strLen);
 		String decodedString = new String(strData);
