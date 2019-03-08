@@ -3,6 +3,7 @@ package com.taurus.core.entity;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.ResultSet;
@@ -269,7 +270,7 @@ public class TDataSerializer {
 			bytes = new byte[bis.available()];
 			bis.read(bytes);
 		} catch (IOException ex) {
-			logger.warn("SFSObject serialize error. Failed reading BLOB data for column: " + colName);
+			logger.warn("TObject serialize error. Failed reading BLOB data for column: " + colName);
 		} finally {
 			try {
 				bis.close();
@@ -522,7 +523,12 @@ public class TDataSerializer {
 		}
 		byte[] strData = new byte[strLen];
 		buffer.get(strData, 0, strLen);
-		String decodedString = new String(strData);
+		String decodedString = StringUtil.Empty;
+		try {
+			decodedString = StringUtil.getString(strData);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		return new TDataWrapper(TDataType.STRING, decodedString);
 	}
 
@@ -597,7 +603,12 @@ public class TDataSerializer {
 			buf.putInt(0);
 			return addData(buffer, buf.array());
 		}
-		byte[] stringBytes = value.getBytes();
+		byte[] stringBytes = null;
+		try {
+			stringBytes = StringUtil.getBytes(value);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		ByteBuffer buf = ByteBuffer.allocate(5 + stringBytes.length);
 		buf.put((byte) TDataType.STRING.getTypeID());
 		buf.putInt(stringBytes.length);
