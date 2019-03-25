@@ -46,7 +46,7 @@ public class TDataSerializer {
 
 	public ITArray binary2array(byte[] data) {
 		if (data.length < 3) {
-			throw new IllegalStateException("Can't decode an TArray. Byte data is insufficient. Size: " + data.length + " bytes");
+			throw new IllegalStateException("Can't decode an Array. Byte data is insufficient. Size: " + data.length + " bytes");
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(data.length);
 		buffer.put(data);
@@ -62,7 +62,7 @@ public class TDataSerializer {
 		}
 		short size = buffer.getShort();
 		if (size < 0) {
-			throw new IllegalStateException("Can't decode TArray. Size is negative = " + size);
+			throw new IllegalStateException("Can't decode Array. Size is negative = " + size);
 		}
 
 		try {
@@ -72,7 +72,7 @@ public class TDataSerializer {
 				if (decodedObject != null)
 					array.add(decodedObject);
 				else {
-					throw new IllegalStateException("TArray item is null! index: " + i);
+					throw new IllegalStateException("Array item is null! index: " + i);
 				}
 			}
 		} catch (RuntimeException codecError) {
@@ -83,7 +83,7 @@ public class TDataSerializer {
 
 	public ITObject binary2object(byte[] data) {
 		if (data.length < 3) {
-			throw new IllegalStateException("Can't decode an TObject. Byte data is insufficient. Size: " + data.length + " bytes");
+			throw new IllegalStateException("Can't decode an Object. Byte data is insufficient. Size: " + data.length + " bytes");
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(data.length);
 		buffer.put(data);
@@ -99,13 +99,13 @@ public class TDataSerializer {
 		}
 		short size = buffer.getShort();
 		if (size < 0) {
-			throw new IllegalStateException("Can't decode TObject. Size is negative = " + size);
+			throw new IllegalStateException("Can't decode Object. Size is negative = " + size);
 		}
 
 		for (int i = 0; i < size; i++) {
 			short keySize = buffer.getShort();
 			if ((keySize < 0) || (keySize > 255)) {
-				throw new IllegalStateException("Invalid TObject key length. Found = " + keySize);
+				throw new IllegalStateException("Invalid Object key length. Found = " + keySize);
 			}
 			byte[] keyData = new byte[keySize];
 			buffer.get(keyData, 0, keyData.length);
@@ -128,7 +128,7 @@ public class TDataSerializer {
 	@SuppressWarnings("unchecked")
 	public ITObject json2object(String jsonStr) {
 		if (jsonStr.length() < 2) {
-			throw new IllegalStateException("Can't decode TObject. JSON String is too short. Len: " + jsonStr.length());
+			throw new IllegalStateException("Can't decode Object. JSON String is too short. Len: " + jsonStr.length());
 		}
 
 		Object o = JSONUtils.parse(jsonStr);
@@ -144,7 +144,7 @@ public class TDataSerializer {
 	@SuppressWarnings("unchecked")
 	public ITArray json2array(String jsonStr) {
 		if (jsonStr.length() < 2) {
-			throw new IllegalStateException("Can't decode TObject. JSON String is too short. Len: " + jsonStr.length());
+			throw new IllegalStateException("Can't decode Object. JSON String is too short. Len: " + jsonStr.length());
 		}
 		Object jsa = JSONUtils.parse(jsonStr);
 		return decodeTArray((List<Object>) jsa);
@@ -200,9 +200,6 @@ public class TDataSerializer {
 		}
 		if ((o instanceof HashMap)) {
 			HashMap jso = (HashMap) o;
-//			if (jso.size() == 0) {
-//				return new TDataWrapper(TDataType.NULL, null);
-//			}
 			return new TDataWrapper(TDataType.TOBJECT, decodeTObject(jso));
 		}
 		if ((o instanceof List)) {
@@ -270,7 +267,7 @@ public class TDataSerializer {
 			bytes = new byte[bis.available()];
 			bis.read(bytes);
 		} catch (IOException ex) {
-			logger.warn("TObject serialize error. Failed reading BLOB data for column: " + colName);
+			logger.warn("Object serialize error. Failed reading BLOB data for column: " + colName);
 		} finally {
 			try {
 				bis.close();

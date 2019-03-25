@@ -26,6 +26,8 @@ import com.taurus.core.util.StringUtil;
 public class WebFilter implements Filter {
 	private static final String	_UTF8	= "UTF-8";
 	private static final String	_POST	= "POST";
+	private static final String	_ALLOW_ORIGIN	= "Access-Control-Allow-Origin";
+	private static final String	_ALLOW_ORIGIN_V	= "*";
 	static final String _Session = "$s";
 	static final String _Version = "$v";
 	
@@ -93,7 +95,7 @@ public class WebFilter implements Filter {
 		}
 		request.setCharacterEncoding(_UTF8);
 		response.setCharacterEncoding(_UTF8);
-
+		response.setHeader(_ALLOW_ORIGIN, _ALLOW_ORIGIN_V);
 		Action action = actionMapping.getAction(target);
 
 		if (action != null) {
