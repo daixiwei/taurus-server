@@ -14,15 +14,15 @@ public abstract class Controller {
 	private String actionKey;
 	private Session session;
 	private int gid;
-	private ITObject parm;
+	private ITObject param;
 	private volatile boolean isFinish;
 	
 	
-	void _init(String actionKey,Session sender,int gid,ITObject parm){
+	void _init(String actionKey,Session sender,int gid,ITObject param){
 		this.actionKey = actionKey;
 		this.session = sender;
 		this.gid = gid;
-		this.parm = parm;
+		this.param = param;
 	}
 	
 	/**
@@ -45,8 +45,8 @@ public abstract class Controller {
 	 * 获取参数
 	 * @return
 	 */
-	public ITObject getParm() {
-		return parm;
+	public ITObject getParams() {
+		return param;
 	}
 	
 	/**

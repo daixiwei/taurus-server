@@ -6,5 +6,5 @@ package com.taurus.permanent.core;
  *
  */
 public interface Interceptor {
-	void intercept(Action action,Controller controller);
+	void intercept(Action action,Controller controller) throws Exception;
 }

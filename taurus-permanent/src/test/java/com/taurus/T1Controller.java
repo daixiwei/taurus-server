@@ -8,6 +8,6 @@ public class T1Controller extends Controller{
 	@ActionKey("test")
 	public void test() {
 		System.out.println("t1 test");
-		this.sendResponse(0, this.getParm());
+		this.sendResponse(0, this.getParams());
 	}
 }

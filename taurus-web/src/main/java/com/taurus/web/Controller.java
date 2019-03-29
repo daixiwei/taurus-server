@@ -16,19 +16,19 @@ import com.taurus.core.util.Logger;
 public abstract class Controller {
 	private String actionKey;
 	private String session;
-	private ITObject parm;
+	private ITObject param;
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private volatile boolean isFinish;
 	protected Logger logger;
 	
-	void _init(HttpServletRequest request,HttpServletResponse response,String actionKey,String session,ITObject parm){
+	void _init(HttpServletRequest request,HttpServletResponse response,String actionKey,String session,ITObject param){
 		this.logger = Logger.getLogger(getClass());
 		this.request = request;
 		this.response = response;
 		this.actionKey = actionKey;
 		this.session = session;
-		this.parm = parm;
+		this.param = param;
 	}
 	
 	/**
@@ -51,8 +51,8 @@ public abstract class Controller {
 	 * 获取参数
 	 * @return
 	 */
-	public ITObject getParm() {
-		return parm;
+	public ITObject getParams() {
+		return param;
 	}
 	
 	/**

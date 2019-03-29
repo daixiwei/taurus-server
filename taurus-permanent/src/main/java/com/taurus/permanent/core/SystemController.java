@@ -231,7 +231,7 @@ public class SystemController implements IService {
 		ITObject resObj = TObject.newInstance();
 		resObj.putString(REQUEST_CMD, actionKey);
 		if (params != null) {
-			resObj.putString(REQUEST_PARM, params.toJson());
+			resObj.putTObject(REQUEST_PARM, params);
 		}
 		Packet packet = new Packet();
 		packet.setId(ACTION_EVENT_CMD);

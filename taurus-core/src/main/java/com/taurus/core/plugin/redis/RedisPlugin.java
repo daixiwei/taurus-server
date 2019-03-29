@@ -32,7 +32,6 @@ public class RedisPlugin implements IPlugin{
 	
 	public boolean start() {
 		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-		
 		jedisPoolConfig.setMaxTotal(config.poolConfig.maxTotal);
 		jedisPoolConfig.setMaxIdle(config.poolConfig.maxIdle);
 		jedisPoolConfig.setMaxIdle(config.poolConfig.minIdle);
@@ -100,6 +99,7 @@ public class RedisPlugin implements IPlugin{
 			infoConfig.host = infoEm.getAttributeValue("host", "127.0.0.1");
 			infoConfig.port = Integer.parseInt(infoEm.getAttributeValue("port", "6379"));
 			infoConfig.database = Integer.parseInt(infoEm.getAttributeValue("database", "0"));
+			infoConfig.password = infoEm.getAttributeValue("password");
 			this.config.infos.add(infoConfig);
 	    }
 		return true;

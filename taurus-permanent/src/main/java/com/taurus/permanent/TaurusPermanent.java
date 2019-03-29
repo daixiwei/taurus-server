@@ -10,6 +10,7 @@ import com.taurus.core.events.EventManager;
 import com.taurus.core.events.IEventListener;
 import com.taurus.core.plugin.PluginService;
 import com.taurus.core.util.Logger;
+import com.taurus.core.util.StringUtil;
 import com.taurus.core.util.executor.ExecutorConfig;
 import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.core.util.task.TaskScheduler;
@@ -226,17 +227,17 @@ public final class TaurusPermanent {
 
 	private Extension instanceExtension() {
 		ServerConfig.ExtensionConfig extensionConfig = config.extensionConfig;
-		if ((extensionConfig.className == null) || (extensionConfig.className.length() == 0)) {
-			throw new RuntimeException("Extension file parameter is missing!");
+		if (StringUtil.isEmpty(extensionConfig.className)) {
+			throw new RuntimeException("Extension className parameter is missing!");
 		}
-		if ((extensionConfig.name == null) || (extensionConfig.name.length() == 0)) {
+		if (StringUtil.isEmpty(extensionConfig.name)) {
 			throw new RuntimeException("Extension name parameter is missing!");
 		}
 		Extension extension = null;
 		try {
 			Class<?> extensionClass = Class.forName(extensionConfig.className);
 			if (!Extension.class.isAssignableFrom(extensionClass)) {
-				throw new RuntimeException("Controller does not implement IController interface: " + extensionConfig.name);
+				throw new RuntimeException("Extension does not extends Extension: " + extensionConfig.name);
 			}
 			extension = (Extension) extensionClass.newInstance();
 			extension.setName(extensionConfig.name);
