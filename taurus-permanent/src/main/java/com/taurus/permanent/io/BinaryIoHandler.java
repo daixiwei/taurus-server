@@ -182,8 +182,6 @@ public class BinaryIoHandler {
 			if(pending.compressed) {
 				tembytes = Utils.uncompress(tembytes);
 			}
-			this.packetsRead += 1L;
-			state = PacketReadState.WAIT_NEW_PACKET;
 			ITObject requestObject = TObject.newFromBinaryData(tembytes);
 			Packet newPacket = new Packet();
 			newPacket.setSender(session);
