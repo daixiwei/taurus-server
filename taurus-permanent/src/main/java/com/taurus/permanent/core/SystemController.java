@@ -33,36 +33,39 @@ public class SystemController implements IService {
 	/**
 	 * 连接验证
 	 */
-	public static final int			ACTION_HANDSHAKE	= 0;
+	public static final int			ACTION_HANDSHAKE			= 0;
 	/**
 	 * pingpong
 	 */
-	public static final int			ACTION_PINGPONG		= 1;
+	public static final int			ACTION_PINGPONG				= 1;
 	/**
 	 * 客户端请求
 	 */
-	public static final int			ACTION_REQUST_CMD	= 2;
+	public static final int			ACTION_REQUST_CMD			= 2;
 	/**
 	 * 服务器事件消息
 	 */
-	public static final int			ACTION_EVENT_CMD	= 3;
+	public static final int			ACTION_EVENT_CMD			= 3;
 
 	private volatile boolean		active;
-	private String					name				= "SystemController";
-	private ThreadPoolExecutor			threadPool;
+	private String					name						= "SystemController";
+	private ThreadPoolExecutor		threadPool;
 
 	private final Logger			logger;
 	private final TaurusPermanent	taurus;
 
 	private SessionManager			sessionManager;
 	private ActionMapping			actionMapping;
-	private final Routes routes;
-	
+	private final Routes			routes;
+
 	public SystemController() {
 		logger = Logger.getLogger(SystemController.class);
 		taurus = TaurusPermanent.getInstance();
 		sessionManager = taurus.getSessionManager();
-		routes = new Routes() {public void config() {}};
+		routes = new Routes() {
+			public void config() {
+			}
+		};
 	}
 
 	public void init(Object o) {
@@ -74,7 +77,7 @@ public class SystemController implements IService {
 		// EventManager eventManager = taurus.getEventManager();
 		// eventManager.addEventListener(TPEvents.EVENT_SESSION_DISCONNECT, this);
 		taurus.getExtension().configRoute(routes);
-		
+
 		actionMapping = new ActionMapping(routes);
 		actionMapping.buildActionMapping();
 		active = true;
@@ -85,7 +88,7 @@ public class SystemController implements IService {
 		List<?> leftOvers = threadPool.shutdownNow();
 		EventManager eventManager = taurus.getEventManager();
 		eventManager.removeAllListener();
-		logger.info("Controller stopping: " + getClass().getName() + ", Unprocessed tasks: " + leftOvers.size());
+		logger.info("SystemController stopping: " + getClass().getName() + ", Unprocessed tasks: " + leftOvers.size());
 	}
 
 	public void enqueueRequest(Packet request) {
@@ -156,7 +159,7 @@ public class SystemController implements IService {
 		BitSwarmEngine.getInstance().write(packet);
 	}
 
-	private final void onRequest(Session sender, Packet packet) throws Exception{
+	private final void onRequest(Session sender, Packet packet) throws Exception {
 		ITObject parm = (ITObject) packet.getData();
 		String key = parm.getString(REQUEST_CMD);
 		Action action = actionMapping.getAction(key);
@@ -174,12 +177,12 @@ public class SystemController implements IService {
 			p = parm.getTObject(REQUEST_PARM);
 		}
 		controller._init(key, sender, gid, p);
-		if(action.getInterceptor()!=null) {
+		if (action.getInterceptor() != null) {
 			action.getInterceptor().intercept(action, controller);
-		}else {
+		} else {
 			action.getMethod().invoke(controller);
 		}
-		
+
 	}
 
 	/**
