@@ -31,7 +31,12 @@ public class ProtocolHandler {
 		}
 
 		packet.setId(requestObject.getByte(ACTION_ID));
-		packet.setData(requestObject.getTObject(PARAM_ID));
+		if(requestObject.containsKey(PARAM_ID)) {
+			packet.setData(requestObject.getTObject(PARAM_ID));
+		}else {
+			packet.setData(null);
+		}
+		
 		TaurusPermanent.getInstance().getController().enqueueRequest(packet);
 	}
 }

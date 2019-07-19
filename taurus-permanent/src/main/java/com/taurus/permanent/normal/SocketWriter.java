@@ -195,7 +195,7 @@ public final class SocketWriter extends BaseCoreService implements Runnable {
 			
 			SelectionKey sk = (SelectionKey) session.getSystemProperty(DefaultConstants.SESSION_SELECTION_KEY);
 			if ((sk != null) && (sk.isValid())) {
-				sk.interestOps(5);
+				sk.interestOps(SelectionKey.OP_READ|SelectionKey.OP_WRITE);
 			} else {
 				logger.warn("Could not OP_WRITE for Session: " + session + ", written bytes: " + bytesWritten);
 			}

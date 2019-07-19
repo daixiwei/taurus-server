@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.taurus.core.events.Event;
 import com.taurus.core.events.IEventListener;
 import com.taurus.core.service.IService;
+import com.taurus.core.util.FixedIndexThreadPool;
 import com.taurus.core.util.Logger;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.ServerConfig.SocketAddress;
@@ -44,6 +45,7 @@ public final class BitSwarmEngine extends BaseCoreService {
 	private WebSocketService			webSocketService;
 	private ProtocolHandler				protocolHandler;
 	private ConnectionFilter			connectionFilter;
+	private FixedIndexThreadPool		threadPool;
 	
 	public static BitSwarmEngine getInstance() {
 		if (__engine__ == null) {
@@ -106,12 +108,23 @@ public final class BitSwarmEngine extends BaseCoreService {
 	                response.setRecipients(socketRecipients);
 	                final Packet webSocketResponse = response.clone();
 	                webSocketResponse.setRecipients(webSocketRecipients);
-	                this.writeToWebSocket(webSocketResponse);
+	                if (response.getId() != SystemController.ACTION_PINGPONG) {
+	    				long index = Thread.currentThread().getId();
+	    				this.threadPool.execute((int) index, response);
+	    			} else {
+	    				writeToWebSocket(response);
+	    			}
 	            }
 	        }
 		}finally {
-			writeToSocket(response);
+			if (response.getId() != SystemController.ACTION_PINGPONG) {
+				long index = Thread.currentThread().getId();
+				this.threadPool.execute((int) index, response);
+			} else {
+				writeToSocket(response);
+			}
 		}
+		
 	}
 	
 	private void writeToSocket(Packet res) {
@@ -125,7 +138,8 @@ public final class BitSwarmEngine extends BaseCoreService {
 
 	private void startCoreServices() throws Exception {
 		sessionManager = SessionManager.getInstance();
-
+		sessionManager.setName(DefaultConstants.SERVICE_SESSION_MANAGER);
+		
 		socketReader = new SocketReader(config.socketReaderThreadPoolSize);
 		// instance io handler
 		IOHandler ioHandler = new IOHandler();
@@ -136,8 +150,7 @@ public final class BitSwarmEngine extends BaseCoreService {
 		// instance socket writer
 		socketWriter = new SocketWriter(config.socketWriterThreadPoolSize);
 		socketWriter.setIOHandler(ioHandler);
-		
-		sessionManager.setName(DefaultConstants.SERVICE_SESSION_MANAGER);
+		threadPool = new FixedIndexThreadPool(config.socketWriterThreadPoolSize, "PacketWrite", PacketWriteWork.class);
 		
 		if(config.webSocketConfig.isActive) {
 			webSocketService = new WebSocketService();
@@ -145,15 +158,11 @@ public final class BitSwarmEngine extends BaseCoreService {
 			coreServicesByName.put(DefaultConstants.SERVICE_WEB_SOCKET, webSocketService);
 		}
 		
-		
-		
 		socketAcceptor.setName(DefaultConstants.SERVICE_SOCKET_ACCEPTOR);
 		socketReader.setName(DefaultConstants.SERVICE_SOCKET_READER);
 		socketWriter.setName(DefaultConstants.SERVICE_SOCKET_WRITER);
 		
-		
 		coreServicesByName.put(DefaultConstants.SERVICE_SESSION_MANAGER, sessionManager);
-		
 		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_ACCEPTOR, socketAcceptor);
 		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_READER, socketReader);
 		coreServicesByName.put(DefaultConstants.SERVICE_SOCKET_WRITER, socketWriter);
@@ -166,6 +175,8 @@ public final class BitSwarmEngine extends BaseCoreService {
 		if(webSocketService!=null) {
 			webSocketService.destroy(null);
 		}
+		int pw_count = threadPool.shutdown();
+		logger.info("PacketWrite stopped. Unprocessed tasks: " + pw_count);
 		Thread.sleep(2000L);
 
 		sessionManager.destroy(null);
@@ -264,6 +275,23 @@ public final class BitSwarmEngine extends BaseCoreService {
 			stopCoreServices();
 		} catch (Exception e) {
 			logger.error("Destroy exception!\n",e);
+		}
+	}
+	
+	public static final class PacketWriteWork extends FixedIndexThreadPool.Work {
+
+		@Override
+		protected void handlerTask(Object task) throws Exception {
+			Packet packet = (Packet) task;
+			List<Session> list = packet.getRecipients();
+			if(list.size() > 0) {
+				SessionType type = list.get(0).getType();
+				if(type == SessionType.WEBSOCKET) {
+					BitSwarmEngine.getInstance().writeToWebSocket(packet);
+				}else {
+					BitSwarmEngine.getInstance().writeToSocket(packet);
+				}
+			}
 		}
 	}
 }

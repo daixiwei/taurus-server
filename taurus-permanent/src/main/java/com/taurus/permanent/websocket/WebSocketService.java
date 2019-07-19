@@ -7,7 +7,6 @@ import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
-import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
@@ -38,13 +37,11 @@ public class WebSocketService extends BaseCoreService{
 	private Undertow server;
 	private final BitSwarmEngine	engine;
 	private SessionManager sessionManager;
-	private TaurusExecutor systemExecutor;
 	private Logger logger;
 	
 	public WebSocketService() {
 		engine = BitSwarmEngine.getInstance();
 		sessionManager = engine.getSessionManager();
-		systemExecutor = TaurusPermanent.getInstance().getSystemExecutor();
 		logger = Logger.getLogger(WebSocketService.class);
 	}
 	
@@ -78,12 +75,7 @@ public class WebSocketService extends BaseCoreService{
 		ITObject requestObject = TObject.newFromJsonData(data);
 		newPacket.setData(requestObject);
 		session.setLastReadTime(System.currentTimeMillis());
-		systemExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				engine.getProtocolHandler().onPacketRead(newPacket);
-			}
-		});
+		engine.getProtocolHandler().onPacketRead(newPacket);	
 	}
 	
 	private void readBinaryAction(WebSocketChannel channel,ByteBuffer data) {
@@ -105,12 +97,7 @@ public class WebSocketService extends BaseCoreService{
 		ITObject requestObject = TObject.newFromBinaryData(bytes);
 		newPacket.setData(requestObject);
 		session.setLastReadTime(System.currentTimeMillis());
-		systemExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				engine.getProtocolHandler().onPacketRead(newPacket);
-			}
-		});
+		engine.getProtocolHandler().onPacketRead(newPacket);	
 	}
 	
 	

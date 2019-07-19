@@ -1,12 +1,12 @@
 package com.taurus.permanent.io;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
-import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.data.Packet;
@@ -24,13 +24,11 @@ public class BinaryIoHandler {
 	private volatile long			packetsRead				= 0L;
 	private volatile long			droppedIncomingPackets	= 0L;
 	private final int				maxPacketSize;
-	private TaurusExecutor 			systemTreadPool;
 	
 	public BinaryIoHandler(IOHandler parentHandler) {
 		this.log = Logger.getLogger(getClass());
 		this.engine = BitSwarmEngine.getInstance();
 		this.maxPacketSize = engine.getConfig().maxPacketSize;
-		this.systemTreadPool = TaurusPermanent.getInstance().getSystemExecutor();
 	}
 
 	public long getReadPackets() {
@@ -177,23 +175,10 @@ public class BinaryIoHandler {
 			if (pending.getExpectedLen() != dataBuffer.capacity()) {
 				throw new IllegalStateException("Expected: " + pending.getExpectedLen() + ", Buffer size: " + dataBuffer.capacity());
 			}
-			byte[] tembytes = dataBuffer.array();
+			final byte[] tembytes = dataBuffer.array();
+			final boolean compressed = pending.compressed;
+			dispatchRequest(session,tembytes,compressed);
 			this.packetsRead += 1L;
-			if(pending.compressed) {
-				tembytes = Utils.uncompress(tembytes);
-			}
-			ITObject requestObject = TObject.newFromBinaryData(tembytes);
-			Packet newPacket = new Packet();
-			newPacket.setSender(session);
-			newPacket.setData(requestObject);
-			
-			this.systemTreadPool.execute(new Runnable() {
-				@Override
-				public void run() {
-					engine.getProtocolHandler().onPacketRead(newPacket);
-				}
-			});
-
 			state = PacketReadState.WAIT_NEW_PACKET;
 
 		} else {
@@ -208,6 +193,23 @@ public class BinaryIoHandler {
 		return new ProcessedPacket(state, data);
 	}
 
+	
+	private void dispatchRequest(Session session, byte[] data,boolean compressed) {
+		if(compressed) {
+			try {
+				data = Utils.uncompress(data);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		ITObject requestObject = TObject.newFromBinaryData(data);
+		Packet newPacket = new Packet();
+		newPacket.setSender(session);
+		newPacket.setData(requestObject);
+		engine.getProtocolHandler().onPacketRead(newPacket);
+	}
+	
 	/**
 	 * 验证字节流数据大小
 	 * @param session

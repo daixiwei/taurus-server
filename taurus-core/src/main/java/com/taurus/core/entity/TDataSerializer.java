@@ -132,7 +132,6 @@ public class TDataSerializer {
 		}
 
 		Object o = JSONUtils.parse(jsonStr);
-
 		return decodeTObject((HashMap<String, Object>) o);
 	}
 

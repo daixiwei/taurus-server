@@ -3,6 +3,7 @@ package com.taurus.permanent.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
@@ -12,7 +13,6 @@ import com.taurus.core.service.IService;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.MD5;
 import com.taurus.core.util.Utils;
-import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
@@ -49,7 +49,7 @@ public class SystemController implements IService {
 
 	private volatile boolean		active;
 	private String					name				= "SystemController";
-	private TaurusExecutor			threadPool;
+	private ThreadPoolExecutor			threadPool;
 
 	private final Logger			logger;
 	private final TaurusPermanent	taurus;

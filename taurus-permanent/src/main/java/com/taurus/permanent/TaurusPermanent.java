@@ -3,7 +3,12 @@ package com.taurus.permanent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.taurus.core.events.Event;
 import com.taurus.core.events.EventManager;
@@ -11,13 +16,12 @@ import com.taurus.core.events.IEventListener;
 import com.taurus.core.plugin.PluginService;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.StringUtil;
-import com.taurus.core.util.executor.ExecutorConfig;
-import com.taurus.core.util.executor.TaurusExecutor;
 import com.taurus.core.util.task.TaskScheduler;
 import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.DefaultConstants;
 import com.taurus.permanent.core.Extension;
 import com.taurus.permanent.core.ServerConfig;
+import com.taurus.permanent.core.ServerConfig.ExecutorConfig;
 import com.taurus.permanent.core.ServerState;
 import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.core.SystemController;
@@ -53,8 +57,8 @@ public final class TaurusPermanent {
 	private GhostUserHunter				ghostUserHunter;
 	private SystemController			controller;
 	private Extension					extension;
-	private TaurusExecutor				systemExecutor;
-	private TaurusExecutor				extensionExecutor;
+	private ThreadPoolExecutor			systemExecutor;
+	private ThreadPoolExecutor			extensionExecutor;
 
 	/**
 	 * get main instance
@@ -105,7 +109,7 @@ public final class TaurusPermanent {
 			this.taskScheduler = new TaskScheduler();
 			this.taskScheduler.init(null);
 
-			this.eventManager = new EventManager(extensionExecutor);
+			this.eventManager = new EventManager(systemExecutor);
 			eventManager.init(null);
 
 			timerPool.setCorePoolSize(config.timerThreadPoolSize);
@@ -135,12 +139,12 @@ public final class TaurusPermanent {
 
 	private void initExecutors() {
 		final ExecutorConfig sys_cfg = this.config.systemThreadPoolConfig;
-		sys_cfg.name = "Sys";
-		this.systemExecutor = new TaurusExecutor(sys_cfg);
+		this.systemExecutor = new ThreadPoolExecutor(sys_cfg.corePoolSize, sys_cfg.maxPoolSize, sys_cfg.keepAliveTime, 
+				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(sys_cfg.maxQueueSize) , new TPThreadFactory(sys_cfg.name));
 
 		final ExecutorConfig ext_cfg = this.config.extensionThreadPoolConfig;
-		ext_cfg.name = "Ext";
-		this.extensionExecutor = new TaurusExecutor(ext_cfg);
+		this.extensionExecutor = new ThreadPoolExecutor(ext_cfg.corePoolSize, ext_cfg.maxPoolSize, ext_cfg.keepAliveTime, 
+				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(ext_cfg.maxQueueSize) , new TPThreadFactory(ext_cfg.name));
 	}
 
 	/**
@@ -169,11 +173,11 @@ public final class TaurusPermanent {
 		return taskScheduler;
 	}
 
-	public TaurusExecutor getSystemExecutor() {
+	public ThreadPoolExecutor getSystemExecutor() {
 		return systemExecutor;
 	}
 
-	public TaurusExecutor getExtensionExecutor() {
+	public ThreadPoolExecutor getExtensionExecutor() {
 		return extensionExecutor;
 	}
 
@@ -281,6 +285,36 @@ public final class TaurusPermanent {
 			} else if (evtName.equals(TPEvents.SESSION_IDLE)) {
 				onSessionIdle((Session) event.getParameter(TPEvents.PARAM_SESSION));
 			}
+		}
+	}
+	
+	private static final class TPThreadFactory implements ThreadFactory {
+		private static final AtomicInteger	POOL_ID;
+		private static final String			THREAD_BASE_NAME	= "%s:%s";
+		private final AtomicInteger			threadId;
+		private final String				poolName;
+
+		static {
+			POOL_ID = new AtomicInteger(0);
+		}
+
+		public TPThreadFactory(final String poolName) {
+			this.threadId = new AtomicInteger(1);
+			this.poolName = poolName;
+			TPThreadFactory.POOL_ID.incrementAndGet();
+		}
+
+		@Override
+		public Thread newThread(final Runnable r) {
+			final Thread t = new Thread(r,
+					String.format(THREAD_BASE_NAME, (this.poolName != null) ? this.poolName : TPThreadFactory.POOL_ID.get(), this.threadId.getAndIncrement()));
+			if (t.isDaemon()) {
+				t.setDaemon(false);
+			}
+			if (t.getPriority() != 5) {
+				t.setPriority(5);
+			}
+			return t;
 		}
 	}
 }

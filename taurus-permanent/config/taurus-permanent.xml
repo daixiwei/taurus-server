@@ -55,25 +55,19 @@
 	<!-- The system thread pool config -->
 	<systemThreadPoolConfig>
 		<name>Sys</name>
-		<coreThreads>4</coreThreads>
-		<backupThreads>16</backupThreads>
-		<maxBackups>64</maxBackups>
-		<queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
-		<secondsTriggeringBackup>50</secondsTriggeringBackup>
-		<backupThreadsExpiry>3600</backupThreadsExpiry>
-		<queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
+		<corePoolSize>4</corePoolSize>
+		<maxPoolSize>16</maxPoolSize>
+		<keepAliveTime>60000</keepAliveTime>
+		<maxQueueSize>20000</maxQueueSize>
 	</systemThreadPoolConfig>
 	
 	<!-- The extension thread pool config -->
 	<extensionThreadPoolConfig>
 		<name>Ext</name>
-		<coreThreads>4</coreThreads>
-		<backupThreads>16</backupThreads>
-		<maxBackups>64</maxBackups>
-		<queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
-		<secondsTriggeringBackup>50</secondsTriggeringBackup>
-		<backupThreadsExpiry>3600</backupThreadsExpiry>
-		<queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
+		<corePoolSize>4</corePoolSize>
+		<maxPoolSize>16</maxPoolSize>
+		<keepAliveTime>60000</keepAliveTime>
+		<maxQueueSize>20000</maxQueueSize>
 	</extensionThreadPoolConfig>
 	
 </server>

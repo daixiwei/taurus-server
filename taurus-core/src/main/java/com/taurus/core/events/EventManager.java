@@ -1,8 +1,9 @@
 package com.taurus.core.events;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import com.taurus.core.service.AbstractService;
 import com.taurus.core.util.Logger;
-import com.taurus.core.util.executor.TaurusExecutor;
 
 /**
  * 事件管理，处理框架内部事件
@@ -11,19 +12,18 @@ import com.taurus.core.util.executor.TaurusExecutor;
  *
  */
 public final class EventManager extends AbstractService implements IEventDispatcher {
-	private final TaurusExecutor		threadPool;
+	private final ThreadPoolExecutor	threadPool;
 	private final EventDispatcher		dispatcher;
 	private final Logger				logger;
 
-
-	public EventManager(TaurusExecutor threadPool) {
+	public EventManager(ThreadPoolExecutor threadPool) {
 		setName("EventManager");
 		logger = Logger.getLogger(EventManager.class);
 
 		this.threadPool = threadPool;
 		dispatcher = new EventDispatcher(threadPool);
 	}
-	
+
 	public void init(Object o) {
 		super.init(o);
 		logger.info(this.name + " init.");
@@ -34,8 +34,8 @@ public final class EventManager extends AbstractService implements IEventDispatc
 		dispatcher.removeAllListener();
 		logger.info(this.name + " shut down.");
 	}
-	
-	public TaurusExecutor getThreadPool() {
+
+	public ThreadPoolExecutor getThreadPool() {
 		return this.threadPool;
 	}
 

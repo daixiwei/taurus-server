@@ -9,8 +9,6 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
-import com.taurus.core.util.executor.ExecutorConfig;
-
 /**
  * 服务器配置信息
  * @author daixiwei daixiwei15@126.com
@@ -63,7 +61,35 @@ public class ServerConfig {
 			return String.format("[%s]%s:%d", type, address, port);
 		}
 	}
-
+	
+	/**
+	 * Taurus Thread pool config
+	 * @author daixiwei
+	 *
+	 */
+	public static final class ExecutorConfig {
+		/**
+		 * 线程池名称
+		 */
+		public String				name;
+		/**
+		 * 核心线程大小
+		 */
+		public int					corePoolSize=4;
+		/**
+		 * 最大线程大小
+		 */
+		public int					maxPoolSize=16;
+		/**
+		 * 线程最大空闲时间(毫秒)
+		 */
+		public int					keepAliveTime =60000;
+		/**
+		 * 最大队列大小
+		 */
+		public int					maxQueueSize=20000;
+	}
+	
 	/**
 	 * 自定义启动控制设置
 	 * @author daixiwei daixiwei15@126.com
@@ -85,13 +111,10 @@ public class ServerConfig {
 
 	private static final void loadThreadPoolConfig(Element em,ExecutorConfig config) {
 		config.name = em.getChildTextTrim("name");
-		config.coreThreads = Integer.parseInt(em.getChildTextTrim("coreThreads"));
-		config.backupThreads = Integer.parseInt(em.getChildTextTrim("backupThreads"));
-		config.maxBackups = Integer.parseInt(em.getChildTextTrim("maxBackups"));
-		config.queueSizeTriggeringBackup = Integer.parseInt(em.getChildTextTrim("queueSizeTriggeringBackup"));
-		config.secondsTriggeringBackup = Integer.parseInt(em.getChildTextTrim("secondsTriggeringBackup"));
-		config.backupThreadsExpiry = Integer.parseInt(em.getChildTextTrim("backupThreadsExpiry"));
-		config.queueSizeTriggeringBackupExpiry = Integer.parseInt(em.getChildTextTrim("queueSizeTriggeringBackupExpiry"));
+		config.corePoolSize = Integer.parseInt(em.getChildTextTrim("corePoolSize"));
+		config.maxPoolSize = Integer.parseInt(em.getChildTextTrim("maxPoolSize"));
+		config.keepAliveTime = Integer.parseInt(em.getChildTextTrim("keepAliveTime"));
+		config.maxQueueSize = Integer.parseInt(em.getChildTextTrim("maxQueueSize"));
 	}
 	
 	public final void load(InputStream is) throws Exception{

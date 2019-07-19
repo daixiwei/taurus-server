@@ -1,7 +1,6 @@
 package com.taurus.permanent.data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,7 +11,7 @@ public class Packet {
 	protected int							id;
 	protected Object						data;
 	protected Session						sender;
-	protected Collection<Session>			recipients;
+	protected List<Session>					recipients;
 	protected byte[]						fragmentBuffer;
 	protected PackDataType					dataType = PackDataType.BINARY;
 	
@@ -42,11 +41,11 @@ public class Packet {
 		this.sender = sender;
 	}
 	
-	public Collection<Session> getRecipients() {
+	public List<Session> getRecipients() {
 		return this.recipients;
 	}
 	
-	public void setRecipients(Collection<Session> recipients) {
+	public void setRecipients(List<Session> recipients) {
 		this.recipients = recipients;
 	}
 	
