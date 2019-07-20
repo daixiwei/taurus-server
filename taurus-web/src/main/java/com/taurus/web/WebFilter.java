@@ -14,29 +14,32 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.plugin.PluginService;
+import com.taurus.core.routes.Action;
+import com.taurus.core.routes.ActionMapping;
+import com.taurus.core.routes.Extension;
+import com.taurus.core.routes.IController;
+import com.taurus.core.routes.Routes;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.StringUtil;
 
-
 /**
  * 
- * @author daixiwei	daixiwei15@126.com
+ * @author daixiwei daixiwei15@126.com
  *
  */
 public class WebFilter implements Filter {
-	private static final String	_UTF8	= "UTF-8";
-	private static final String	_POST	= "POST";
+	private static final String	_UTF8			= "UTF-8";
+	private static final String	_POST			= "POST";
 	private static final String	_ALLOW_ORIGIN	= "Access-Control-Allow-Origin";
 	private static final String	_ALLOW_ORIGIN_V	= "*";
-	static final String _Session = "$s";
-	static final String _Version = "$v";
-	
+	static final String			_Session		= "$s";
+	static final String			_Version		= "$v";
+
 	private int					contextPathLength;
 	private Extension			extension;
 	private ActionMapping		actionMapping;
-	public 	static int			forceVer	= 1;
-	private Logger log;
-	
+	public static int			forceVer		= 1;
+	private Logger				log;
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -47,9 +50,12 @@ public class WebFilter implements Filter {
 			log = Logger.getLogger(WebFilter.class);
 			String contextPath = filterConfig.getServletContext().getContextPath();
 			contextPathLength = StringUtil.isNotEmpty(contextPath) ? contextPath.length() : 0;
-			Routes routes = new Routes() {public void config() {}};
+			Routes routes = new Routes() {
+				public void config() {
+				}
+			};
 			actionMapping = new ActionMapping(routes);
-			
+
 			String extensionClass = filterConfig.getInitParameter("main");
 			this.extension = instanceExtension(extensionClass);
 			this.extension.configRoute(routes);
@@ -59,7 +65,7 @@ public class WebFilter implements Filter {
 			throw new ServletException(e);
 		}
 	}
-	
+
 	private Extension instanceExtension(String extensionClass) {
 		if (StringUtil.isEmpty(extensionClass)) {
 			throw new RuntimeException("Extension class parameter is missing!");
@@ -85,7 +91,7 @@ public class WebFilter implements Filter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
-		
+
 		String target = request.getRequestURI();
 		if (StringUtil.isEmpty(target)) {
 			return;
@@ -103,7 +109,7 @@ public class WebFilter implements Filter {
 			if (!method.equals(_POST)) {
 				return;
 			}
-			
+
 			ITObject obj = WebUtils.httpRequest(request);
 			if (obj == null) {
 				throw new RuntimeException("data is null!");
@@ -117,48 +123,45 @@ public class WebFilter implements Filter {
 				WebUtils.httpResponse(response, -1, null);
 				return;
 			}
-			
+
 			String session = null;
 			if (obj.containsKey(_Session)) {
 				session = obj.getString(_Session);
 			}
 			ITObject params = obj.getTObject(WebUtils._Param);
-			Controller controller=null;
+			IController controller = null;
 			try {
 				controller = action.getControllerClass().newInstance();
-				controller._init(request,response,action.getActionKey(), session, params);
-		
-				if(action.getInterceptor()!=null) {
-					if(action.getInterceptor().intercept(action, controller)) {
-						action.getMethod().invoke(controller);
-					}
-				}else {
-					action.getMethod().invoke(controller);
-				}
-			}catch (InvocationTargetException e) {
+				((Controller) controller)._init(request, response, action.getActionKey(), session, params);
+
+				if (action.getInterceptor() != null) {
+					action.getInterceptor().intercept(action, controller);
+				} 
+				action.getMethod().invoke(controller);
+			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
 				if (targetException instanceof WebException) {
-					WebException we = (WebException)targetException;
+					WebException we = (WebException) targetException;
 					controller.sendResponse(we.getCode(), null);
-				}else {
+				} else {
 					controller.sendResponse(500, null);
 					log.error(targetException);
 				}
-			}catch(Exception e) {
-				if(controller!=null) {
+			} catch (Exception e) {
+				if (controller != null) {
 					controller.sendResponse(500, null);
 				}
 				log.error(e);
 			}
-		}else {
+		} else {
 			chain.doFilter(req, res);
 		}
 	}
-	
+
 	@Override
 	public void destroy() {
 		PluginService.me().stop();
-//		main.destroy();
+		// main.destroy();
 	}
 
 }

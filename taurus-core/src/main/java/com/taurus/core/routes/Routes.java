@@ -1,4 +1,4 @@
-package com.taurus.web;
+package com.taurus.core.routes;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,12 +13,13 @@ import com.taurus.core.util.StringUtil;
  *
  */
 public abstract class Routes {
+	
 	private static List<Routes> routesList = new ArrayList<Routes>();
 	private static Set<String> controllerKeySet = new HashSet<String>();
 	
 	private List<Route> routeItemList = new ArrayList<Route>();
-	
 	private Interceptor interceptor;
+	private boolean addSlash = true;
 	
 	/**
 	 * Implement this method to add route, add interceptor and set baseViewPath
@@ -47,8 +48,8 @@ public abstract class Routes {
 	 * @param controllerKey A key can find controller
 	 * @param controller Controller Class
 	 */
-	public Routes add(String controllerKey, Class<? extends Controller> controller) {
-		routeItemList.add(new Route(controllerKey, controller));
+	public Routes add(String controllerKey, Class<? extends IController> controller) {
+		routeItemList.add(new Route(controllerKey, controller,this.addSlash));
 		return this;
 	}
 	
@@ -64,11 +65,16 @@ public abstract class Routes {
 		return interceptor;
 	}
 	
+	public void setAddSlash(boolean add) {
+		this.addSlash =add;
+	}
+	
+	
 	public static class Route {
 		private String controllerKey;
-		private Class<? extends Controller> controller;
+		private Class<? extends IController> controller;
 		
-		public Route(String controllerKey, Class<? extends Controller> controller) {
+		public Route(String controllerKey, Class<? extends IController> controller,boolean addSlash) {
 			if (StringUtil.isEmpty(controllerKey)) {
 				throw new IllegalArgumentException("controllerKey can not be blank");
 			}
@@ -76,14 +82,16 @@ public abstract class Routes {
 				throw new IllegalArgumentException("controllerClass can not be null");
 			}
 			
-			this.controllerKey = processControllerKey(controllerKey);
+			this.controllerKey = processControllerKey(controllerKey,addSlash);
 			this.controller = controller;
 		}
 		
-		private String processControllerKey(String controllerKey) {
+		private String processControllerKey(String controllerKey,boolean addSlash) {
 			controllerKey = controllerKey.trim();
-			if (!controllerKey.startsWith("/")) {
-				controllerKey = "/" + controllerKey;
+			if(addSlash) {
+				if (!controllerKey.startsWith("/")) {
+					controllerKey = "/" + controllerKey;
+				}
 			}
 			if (controllerKeySet.contains(controllerKey)) {
 				throw new IllegalArgumentException("controllerKey already exists: " + controllerKey);
@@ -98,7 +106,7 @@ public abstract class Routes {
 			return controllerKey;
 		}
 		
-		public Class<? extends Controller> getController() {
+		public Class<? extends IController> getController() {
 			return controller;
 		}
 		

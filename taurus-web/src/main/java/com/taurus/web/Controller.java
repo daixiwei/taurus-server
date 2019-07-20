@@ -6,14 +6,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.taurus.core.entity.ITObject;
+import com.taurus.core.routes.IController;
 import com.taurus.core.util.Logger;
+import com.taurus.core.util.StringUtil;
 
 /**
  * Controller
  * @author daixiwei
  *
  */
-public abstract class Controller {
+public abstract class Controller implements IController{
 	private String actionKey;
 	private String session;
 	private ITObject param;
@@ -82,23 +84,42 @@ public abstract class Controller {
 		return getIpAddr(this.request);
 	}
 	
+	private static final String[] HEADERS = {   
+        "X-Forwarded-For",  
+        "Proxy-Client-IP",  
+        "WL-Proxy-Client-IP",  
+        "HTTP_X_FORWARDED_FOR",  
+        "HTTP_X_FORWARDED",  
+        "HTTP_X_CLUSTER_CLIENT_IP",  
+        "HTTP_CLIENT_IP",  
+        "HTTP_FORWARDED_FOR",  
+        "HTTP_FORWARDED",  
+        "HTTP_VIA",  
+        "REMOTE_ADDR",  
+        "X-Real-IP"  
+    };  
+	
+	private static final String UNKNOWN = "unknown";
+	 /** 
+     * 判断ip是否为空，空返回true 
+     * @param ip 
+     * @return 
+     */  
+	private static boolean isEmptyIp(final String ip){  
+        return (StringUtil.isEmpty(ip) || UNKNOWN.equalsIgnoreCase(ip));  
+    }  
+	
 	private static String getIpAddr(HttpServletRequest request) {
-		String ip = request.getHeader("X-Forwarded-For");
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("Proxy-Client-IP");
-		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("WL-Proxy-Client-IP");
-		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("HTTP_CLIENT_IP");
-		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-		}
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getRemoteAddr();
-		}
+		String ip = StringUtil.Empty;
+		 for (String header : HEADERS) {  
+            ip = request.getHeader(header);  
+            if(!isEmptyIp(ip)) {  
+                 break;  
+            }  
+        }  
+        if(isEmptyIp(ip)){  
+            ip = request.getRemoteAddr();  
+        }  
 		return ip;
 	}
 }

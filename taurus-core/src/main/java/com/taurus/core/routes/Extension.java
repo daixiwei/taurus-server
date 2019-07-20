@@ -1,5 +1,10 @@
-package com.taurus.permanent.core;
+package com.taurus.core.routes;
 
+/**
+ * Extension class.
+ * @author daixiwei
+ *
+ */
 public abstract class Extension {
 	private String name;
 	
@@ -18,10 +23,18 @@ public abstract class Extension {
 	 */
 	public void onStop() {}
 	
+	/**
+	 * set extension name
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 	
+	/**
+	 * get extension name
+	 * @return
+	 */
 	public String getName() {
 		return this.name;
 	}

@@ -2,6 +2,7 @@ package com.taurus.permanent.core;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
+import com.taurus.core.routes.IController;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
 
@@ -10,7 +11,7 @@ import com.taurus.permanent.data.Session;
  * @author daixiwei
  *
  */
-public abstract class Controller {
+public abstract class Controller implements IController{
 	private String actionKey;
 	private Session session;
 	private int gid;

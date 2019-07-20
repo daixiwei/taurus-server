@@ -2,8 +2,8 @@ package com.taurus;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.events.Event;
-import com.taurus.permanent.core.Extension;
-import com.taurus.permanent.core.Routes;
+import com.taurus.core.routes.Extension;
+import com.taurus.core.routes.Routes;
 import com.taurus.permanent.core.TPEvents;
 import com.taurus.permanent.data.Session;
 

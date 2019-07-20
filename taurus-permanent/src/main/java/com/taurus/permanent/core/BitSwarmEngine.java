@@ -110,7 +110,7 @@ public final class BitSwarmEngine extends BaseCoreService {
 	                webSocketResponse.setRecipients(webSocketRecipients);
 	                if (response.getId() != SystemController.ACTION_PINGPONG) {
 	    				long index = Thread.currentThread().getId();
-	    				this.threadPool.execute((int) index, response);
+	    				this.threadPool.execute((int) index, webSocketResponse);
 	    			} else {
 	    				writeToWebSocket(response);
 	    			}

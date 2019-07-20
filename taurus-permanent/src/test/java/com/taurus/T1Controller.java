@@ -1,6 +1,6 @@
 package com.taurus;
 
-import com.taurus.permanent.core.ActionKey;
+import com.taurus.core.routes.ActionKey;
 import com.taurus.permanent.core.Controller;
 
 public class T1Controller extends Controller{

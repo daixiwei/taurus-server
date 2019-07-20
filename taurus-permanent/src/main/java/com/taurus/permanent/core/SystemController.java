@@ -9,6 +9,10 @@ import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.events.Event;
 import com.taurus.core.events.EventManager;
+import com.taurus.core.routes.Action;
+import com.taurus.core.routes.ActionMapping;
+import com.taurus.core.routes.IController;
+import com.taurus.core.routes.Routes;
 import com.taurus.core.service.IService;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.MD5;
@@ -66,6 +70,7 @@ public class SystemController implements IService {
 			public void config() {
 			}
 		};
+		routes.setAddSlash(false);
 	}
 
 	public void init(Object o) {
@@ -73,9 +78,6 @@ public class SystemController implements IService {
 			throw new IllegalArgumentException("Object is already initialized. Destroy it first!");
 		}
 		threadPool = taurus.getExtensionExecutor();
-
-		// EventManager eventManager = taurus.getEventManager();
-		// eventManager.addEventListener(TPEvents.EVENT_SESSION_DISCONNECT, this);
 		taurus.getExtension().configRoute(routes);
 
 		actionMapping = new ActionMapping(routes);
@@ -168,7 +170,7 @@ public class SystemController implements IService {
 			return;
 		}
 
-		Controller controller = action.getControllerClass().newInstance();
+		IController controller = action.getControllerClass().newInstance();
 		int gid = 0;
 		if (parm.containsKey(REQUEST_GID))
 			gid = parm.getInt(REQUEST_GID);
@@ -176,7 +178,7 @@ public class SystemController implements IService {
 		if (parm.containsKey(REQUEST_PARM)) {
 			p = parm.getTObject(REQUEST_PARM);
 		}
-		controller._init(key, sender, gid, p);
+		((Controller)controller)._init(key, sender, gid, p);
 		if (action.getInterceptor() != null) {
 			action.getInterceptor().intercept(action, controller);
 		} else {

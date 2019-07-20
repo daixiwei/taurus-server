@@ -1,4 +1,4 @@
-package com.taurus.permanent.core;
+package com.taurus.core.routes;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.taurus.core.routes.Routes.Route;
 import com.taurus.core.util.StringUtil;
-import com.taurus.permanent.core.Routes.Route;
 
 /**
  * ActionMapping.
@@ -33,11 +33,11 @@ public class ActionMapping {
 		return ret;
 	}
 	
-	protected void buildActionMapping() {
+	public void buildActionMapping() {
 		mapping.clear();
 		for (Routes routes : getRoutesList()) {
 			for (Route route : routes.getRouteItemList()) {
-				Class<? extends Controller> controllerClass = route.getController();
+				Class<? extends IController> controllerClass = route.getController();
 				
 				Method[] methods = controllerClass.getDeclaredMethods();
 				for (Method method : methods) {
@@ -50,10 +50,10 @@ public class ActionMapping {
 					String actionKey = ak.value().trim();
 					if (StringUtil.isEmpty(actionKey))
 						throw new IllegalArgumentException(controllerClass.getName() + "." + methodName + "(): The argument of ActionKey can not be blank.");
-					Interceptor interceptor = ak.validate()?routes.getInterceptor():null;
-					Action action = new Action(controllerKey, actionKey, route.getController(), method, methodName,interceptor);
+					Interceptor interceptor = ak.validate() > 0 ?routes.getInterceptor():null;
+					Action action = new Action(controllerKey, actionKey, route.getController(), method, methodName,interceptor,ak);
 					
-					actionKey =StringUtil.isEmpty(controllerKey) ? actionKey : (controllerKey + SLASH+actionKey);
+					actionKey =controllerKey.equals(SLASH) ? SLASH+ actionKey : (controllerKey + SLASH+actionKey);
 					if (mapping.put(actionKey, action) != null) {
 						throw new RuntimeException(buildMsg(actionKey, controllerClass, method));
 					}
@@ -62,7 +62,7 @@ public class ActionMapping {
 		}
 	}
 	
-	protected String buildMsg(String actionKey, Class<? extends Controller> controllerClass, Method method) {
+	protected String buildMsg(String actionKey, Class<? extends IController> controllerClass, Method method) {
 		StringBuilder sb = new StringBuilder("The action \"")
 			.append(controllerClass.getName()).append(".")
 			.append(method.getName()).append("()\" can not be mapped, ")

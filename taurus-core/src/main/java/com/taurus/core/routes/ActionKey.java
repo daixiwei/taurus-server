@@ -1,4 +1,4 @@
-package com.taurus.web;
+package com.taurus.core.routes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -15,6 +15,9 @@ import java.lang.annotation.Target;
 public @interface ActionKey {
 	String value();
 	
-	boolean validate() default true;
+	int validate() default 1;
+	
+	/**参数{"a","1","b","2"}*/
+	String[] params() default {};
 }
 
