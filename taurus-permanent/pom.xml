@@ -7,11 +7,11 @@
 	<parent>
 		<groupId>com.taurus</groupId>
 		<artifactId>taurus-server</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<packaging>jar</packaging>
 	<artifactId>taurus-permanent</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	
 	
 	<dependencies>
@@ -31,14 +31,6 @@
 		    <groupId>io.undertow</groupId>
 		    <artifactId>undertow-core</artifactId>
 		    <version>2.0.16.Final</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.tanukisoftware</groupId>
-			<artifactId>wrapper</artifactId>
-			<version>3.5.37</version>
-			<scope>system</scope>
-    		<systemPath>${project.basedir}/libs/wrapper3.5.37.jar</systemPath>  
 		</dependency>
 	</dependencies>
 </project>

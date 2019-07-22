@@ -79,7 +79,7 @@ public class SocketAcceptor extends BaseCoreService implements Runnable {
 		isActive = true;
 		initThreadPool();
 
-		logger.info("SocketAcceptor initialized");
+		logger.info("SocketAcceptor initialized (pool size:"+threadPoolSize+")");
 		checkBoundSockets();
 	}
 

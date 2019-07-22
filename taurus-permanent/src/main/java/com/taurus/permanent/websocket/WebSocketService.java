@@ -10,6 +10,7 @@ import com.taurus.core.util.Utils;
 import com.taurus.permanent.TaurusPermanent;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
+import com.taurus.permanent.core.ServerConfig;
 import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.data.ISocketChannel;
 import com.taurus.permanent.data.PackDataType;
@@ -48,10 +49,12 @@ public class WebSocketService extends BaseCoreService{
 	public void init(Object o) {
 		super.init(o);
 		WSConnectionListener listener = new WSConnectionListener(this);
-		server = Undertow.builder().addHttpListener(8080, "0.0.0.0")
+		ServerConfig config = TaurusPermanent.getInstance().getConfig();
+		server = Undertow.builder().addHttpListener(config.webSocketConfig.port, config.webSocketConfig.address)
 				.setHandler(Handlers.path().addPrefixPath("/websocket", Handlers.websocket(listener)))
 				.build();
 		server.start();
+		logger.info("Websocket listen --> "+config.webSocketConfig.address+":"+config.webSocketConfig.port);
 		logger.info("Websocket service start!");
 	}
 	

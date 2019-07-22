@@ -66,8 +66,6 @@ public final class BitSwarmEngine extends BaseCoreService {
 	
 
 	private final void bootSequence() throws Exception {
-		logger.info("BitSwarmEngine :  { " + Thread.currentThread().getName() + " }");
-		
 		startCoreServices();
 		
 		bindSockets(config.socketAddresses);
@@ -254,10 +252,8 @@ public final class BitSwarmEngine extends BaseCoreService {
 		};
 		
 		protocolHandler = new ProtocolHandler();
-		
 		connectionFilter = new ConnectionFilter();
 		setConnectionFilterConfig();
-		
 		coreServicesByName = new ConcurrentHashMap<String, IService>();
 		configByService = new HashMap<IService, Object>();
 		
@@ -266,7 +262,6 @@ public final class BitSwarmEngine extends BaseCoreService {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		
 		socketReader.addEventListener(TPEvents.SESSION_LOST, this.eventHandler);
 	}
 	

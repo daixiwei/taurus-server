@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.taurus</groupId>
     <artifactId>taurus-server</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
   <packaging>jar</packaging>
   <artifactId>taurus-core</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   
   <dependencies>
 		<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
@@ -18,10 +18,10 @@
 			<artifactId>jedis</artifactId>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+		<!-- 需要用HikariCP时导入 ，自己在项目中添加-->
 		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>druid</artifactId>
+	        <groupId>com.zaxxer</groupId>
+	        <artifactId>HikariCP</artifactId>
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/jdom/jdom -->

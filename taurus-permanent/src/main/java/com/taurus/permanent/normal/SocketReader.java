@@ -60,20 +60,16 @@ public class SocketReader extends BaseCoreService implements Runnable {
 
 	public void init(Object o) {
 		super.init(o);
-
 		if (isActive) {
 			throw new IllegalArgumentException("Object is already initialized. Destroy it first!");
 		}
-
 		sessionManager = engine.getSessionManager();
 		socketAcceptor = engine.getSocketAcceptor();
 		socketWriter = engine.getSocketWriter();
-
 		isActive = true;
 		initThreadPool();
 
-		logger.info("IOHandler: " + ioHandler);
-		logger.info("SocketReader started");
+		logger.info("SocketReader started (pool size:"+threadPoolSize+")");
 	}
 
 	public void destroy(Object o) {
@@ -84,7 +80,6 @@ public class SocketReader extends BaseCoreService implements Runnable {
 		int pr_count = packetReaderPool.shutdown();
 		try {
 			Thread.sleep(500L);
-
 			readSelector.close();
 		} catch (Exception e) {
 			logger.warn("Error when shutting down TCP Selector: " + e.getMessage());
@@ -102,7 +97,6 @@ public class SocketReader extends BaseCoreService implements Runnable {
 	}
 
 	public void run() {
-		// ByteBuffer readBuffer = Utils.allocateBuffer(engine.getConfig().maxReadBufferSize, engine.getConfig().readBufferType);
 		Thread.currentThread().setName("SocketReader");
 
 		while (isActive) {

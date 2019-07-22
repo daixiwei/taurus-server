@@ -106,7 +106,9 @@ public class ServerConfig {
 	 *
 	 */
 	public static final class WebSocketConfig {
-		public boolean isActive = true;
+		public boolean	isActive	= true;
+		public String	address		= "0.0.0.0";
+		public int		port		= 8080;
 	}
 
 	private static final void loadThreadPoolConfig(Element em,ExecutorConfig config) {

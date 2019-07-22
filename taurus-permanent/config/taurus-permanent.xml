@@ -17,8 +17,8 @@
 	<sessionPacketQueueSize>160</sessionPacketQueueSize>
 	
 	<!-- Thread Pool Size of the 3 main stages of the Bitswarm Engine -->
-	<socketAcceptorThreadPoolSize>1</socketAcceptorThreadPoolSize>
-	<socketReaderThreadPoolSize>1</socketReaderThreadPoolSize>
+	<socketAcceptorThreadPoolSize>2</socketAcceptorThreadPoolSize>
+	<socketReaderThreadPoolSize>3</socketReaderThreadPoolSize>
 	<socketWriterThreadPoolSize>3</socketWriterThreadPoolSize>
 	
 	<!-- Enable disable Nagle algorithm on sockets, true == disable -->
@@ -44,6 +44,8 @@
 	
 	<webSocket>
 	    <isActive>true</isActive>
+	    <address>0.0.0.0</address>
+	    <port>8080</port>
 	</webSocket>
 	
 	<!-- Main extension class -->

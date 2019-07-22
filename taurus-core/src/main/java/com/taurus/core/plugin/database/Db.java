@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.alibaba.druid.pool.DruidDataSource;
+import javax.sql.DataSource;
+
 import com.taurus.core.entity.ITArray;
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TArray;
@@ -29,7 +30,7 @@ import com.taurus.core.util.StringUtil;
  */
 public class Db {
 	protected String name;
-	protected DruidDataSource ds;
+	protected DataSource ds;
 	
 	private static final String STR_NULL = "";
 	private static final char   CHAR_COMMA = ',';
@@ -37,7 +38,7 @@ public class Db {
 	private static final char   CHAR_UNKNOWN = '?';
 	private static final String   TYPE_BOOLEAN = "boolean";
 	
-	public Db(String name,DruidDataSource ds) {
+	public Db(String name,DataSource ds) {
 		this.name = name;
 		this.ds = ds;
 	}
@@ -554,6 +555,28 @@ public class Db {
 	 * @throws SQLException
 	 */
 	public ITArray prepareCall(String prepareName,ITArray data) throws SQLException{
+		return prepareCall(prepareName,data,true);
+	}
+	
+	/**
+	 * 存储过程调用    call prepareName()
+	 * @param prepareName		存储过程名
+	 * @param data				数据
+	 * @return
+	 * @throws SQLException
+	 */
+	public void prepareCallNonResult(String prepareName,ITArray data) throws SQLException{
+		prepareCall(prepareName,data,false);
+	}
+	
+	/**
+	 * 存储过程调用    call prepareName()
+	 * @param prepareName		存储过程名
+	 * @param data				数据
+	 * @return
+	 * @throws SQLException
+	 */
+	private ITArray prepareCall(String prepareName,ITArray data,boolean resultSet) throws SQLException{
 		if(StringUtil.isEmpty(prepareName)){
 			throw new SQLException("prepare name is null!");
 		}
@@ -611,9 +634,14 @@ public class Db {
 			if(conn ==null)throw new SQLException("db connection is null!");
 			stmt = conn.prepareCall(sql);
 			if(stmt ==null)throw new SQLException(sql +"sql error!");
-			rset = stmt.executeQuery();
-			ITArray list = TArray.newFromResultSet(rset);
-			return list;
+			if(resultSet) {
+				rset = stmt.executeQuery();
+				ITArray list = TArray.newFromResultSet(rset);
+				return list;
+			}else {
+				stmt.executeUpdate();
+				return null;
+			}
 		}finally{
 			try {
 				if(rset!=null)rset.close();
@@ -625,93 +653,9 @@ public class Db {
 				}
 			}
 		}
-		
 	}
 	
-	/**
-	 * 批量存储过程调用    call prepareName()
-	 * @param prepareName		存储过程名
-	 * @param data				数据
-	 * @return
-	 * @throws SQLException
-	 */
-	public int[] prepareCallBatch(String prepareName,ITArray list) throws SQLException{
-		if(StringUtil.isEmpty(prepareName)){
-			throw new SQLException("prepare name is null!");
-		}
-		if(list == null){
-			throw new SQLException("data is null!");
-		}
-		if(list.size() ==0)return null;
-		StringBuilder valuesql = new StringBuilder();
-		
-		ITArray data = list.getTArray(0);
-		int count =0;
-		for (int i=0;i<data.size();++i) {
-			if(count>0){
-				valuesql.append(CHAR_COMMA);
-			}
-			count++;
-			valuesql.append(CHAR_UNKNOWN);
-		}
-		String sql = String.format("{call %s(%s)}", prepareName,valuesql);
-		
-		Connection conn = null;
-		CallableStatement stmt =null;
-		ResultSet rset = null;
-		try{
-			conn = ds.getConnection();
-			if(conn ==null)throw new SQLException("db connection is null!");
-			conn.setAutoCommit(false);
-			stmt = conn.prepareCall(sql);
-			if(stmt ==null)throw new SQLException(sql +"sql error!");
-			
-			for(int i=0;i<list.size();++i) {
-				ITArray tem = list.getTArray(i);
-				for (int k=1;k<=tem.size();++k) {
-					
-					TDataWrapper wrapper = tem.get(k-1);
-					switch(wrapper.getTypeId()){
-						case SHORT:
-						case INT:
-						case DOUBLE:
-						case FLOAT:
-						case BYTE:
-						case BOOL:
-						case LONG:
-						case STRING:
-							stmt.setObject(k, wrapper.getObject());
-							break;
-						case TOBJECT:
-							ITObject mo = (ITObject)wrapper.getObject();
-							stmt.setString(k, mo.toJson());
-							break;
-						case TARRAY:
-							ITArray ao = (ITArray)wrapper.getObject();
-							stmt.setString(k, ao.toJson());
-							break;
-						default:
-							break;
-					}
-				}
-				stmt.addBatch();
-			}
-			int[] result_list = stmt.executeBatch();
-			conn.commit();
-			return result_list;
-		}finally{
-			try {
-				if(rset!=null)rset.close();
-			} finally {
-				try {
-					if(stmt!=null)stmt.close();
-				}finally {
-					if(conn!=null)conn.close();
-				}
-			}
-		}
-		
-	}
+	
 	
 	/**
 	 * 获取当前DB名称

@@ -6,11 +6,23 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
+
+import com.mysql.cj.util.Util;
+import com.taurus.core.entity.ITArray;
+import com.taurus.core.entity.TArray;
+import com.taurus.core.plugin.PluginService;
+import com.taurus.core.plugin.database.DataBase;
+import com.taurus.core.plugin.redis.Redis;
+import com.taurus.core.util.Utils;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Transaction;
 
 public class Test {
 	 private static final int[] PIDS= {
@@ -98,11 +110,50 @@ public class Test {
 		return id;
 	}
 	
+	private static void emoji_test() {
+		try {
+			PluginService.me().loadConfig();
+			String sql = "insert into test(nick) values('12🦌🦌🦌12')";
+			long time = System.currentTimeMillis();
+			for(int i=0;i<1;++i) {
+				DataBase.use().executeUpdate(sql);
+			}
+			System.out.println("use time:"+(System.currentTimeMillis() - time));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void find_test() {
+		try {
+			PluginService.me().loadConfig();
+			String sql = "select * from test";
+			long time = System.currentTimeMillis();
+			for(int i=0;i<2000;++i) {
+				DataBase.use().executeQueryByMPArray(sql);
+			}
+			System.out.println("use time:"+(System.currentTimeMillis() - time));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public static void main(String[] args) {
+		try {
+			PluginService.me().loadConfig();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+//		find_test();
 //		for(int i =0;i<100;++i)
 //		System.out.println(rndId());
 		
+		/*
 		List<File> files = searchFiles(new File("F:\\work\\pro\\qyq_client\\client\\new_pro\\qyq_new_ui\\"), "package.xml");
 		List<File> files1 = searchFiles(new File("F:\\work\\pro\\qyq_client\\client\\new_pro\\qyq_exinfo_ui\\"), "package.xml");
 		files.addAll(files1);
@@ -137,7 +188,7 @@ public class Test {
 //					e.printStackTrace();
 //				}
             }
-        }  
+        }  */
 	}
 	
 }

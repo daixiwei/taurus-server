@@ -6,7 +6,7 @@
 	<groupId>com.taurus</groupId>
 	<artifactId>taurus-server</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>taurus-server</name>
 
 	<properties>
@@ -25,21 +25,21 @@
 			<dependency>
 				<groupId>com.taurus</groupId>
 				<artifactId>taurus-core</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.1</version>
 			</dependency>
 			
 			<!--依赖 taurus-permanent -->
 			<dependency>
 				<groupId>com.taurus</groupId>
 				<artifactId>taurus-permanent</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.1</version>
 			</dependency>
 			
 			<!--依赖 taurus-web -->
 			<dependency>
 				<groupId>com.taurus</groupId>
 				<artifactId>taurus-web</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.1</version>
 			</dependency>
 	
 			<!-- 需要用redis时导入 -->
@@ -49,18 +49,19 @@
 				<version>2.9.0</version>
 			</dependency>
 	
-			<!-- 需要用druid时导入 ，自己在项目中添加-->
+			<!-- 需要用HikariCP时导入 ，自己在项目中添加-->
 			<dependency>
-				<groupId>com.alibaba</groupId>
-				<artifactId>druid</artifactId>
-				<version>1.1.10</version>
-			</dependency>
+		        <groupId>com.zaxxer</groupId>
+		        <artifactId>HikariCP</artifactId>
+		        <version>3.3.1</version>
+		    </dependency>
+
 			
 			<!-- 需要用mysql时导入 ，自己在项目中添加 -->
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.13</version>
+				<version>8.0.16</version>
 			</dependency>
 			
 			<!-- https://mvnrepository.com/artifact/jdom/jdom -->

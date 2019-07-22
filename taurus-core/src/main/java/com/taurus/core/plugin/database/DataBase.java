@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.taurus.core.util.StringUtil;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * DataBase 数据库工具
@@ -32,7 +33,7 @@ public class DataBase {
 	static void removeDb(String dbName) {
 		Db db = dbMap.remove(dbName);
 		if(db == mainDb) {
-			db.ds.close();
+			((HikariDataSource)db.ds).close();
 			mainDb = null;
 		}
 	}
