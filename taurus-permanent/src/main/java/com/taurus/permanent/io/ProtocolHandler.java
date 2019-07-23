@@ -2,7 +2,7 @@ package com.taurus.permanent.io;
 
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.data.Packet;
 
 /**
@@ -37,6 +37,6 @@ public class ProtocolHandler {
 			packet.setData(null);
 		}
 		
-		TaurusPermanent.getInstance().getController().enqueueRequest(packet);
+		TPServer.me().getController().enqueueRequest(packet);
 	}
 }

@@ -9,7 +9,7 @@ import com.zaxxer.hikari.HikariDataSource;
 /**
  * DataBase 数据库工具
  * <pre>
- * DataBase.use().executeQueryByMPArray("SELECT * FROM table");
+ * DataBase.use().executeQueryByTArray("SELECT * FROM table");
  * </pre>
  * @author daixiwei
  *

@@ -44,9 +44,9 @@ public final class Utils {
 	 * @return
 	 */
 	public static byte[] resizeByteArray(byte[] source, int pos, int size) {
-		byte[] tmpArray = new byte[size];
-		System.arraycopy(source, pos, tmpArray, 0, size);
-		return tmpArray;
+		byte[] tTArray = new byte[size];
+		System.arraycopy(source, pos, tTArray, 0, size);
+		return tTArray;
 	}
 
 	public static ITObject bytesToJson(byte[] bytes) throws IOException {
@@ -128,7 +128,7 @@ public final class Utils {
 	
 	
 	/**
-	 * MPObject copy
+	 * TObject copy
 	 * @param from
 	 * @param to
 	 */
@@ -142,7 +142,7 @@ public final class Utils {
 	}
 	
 	/**
-	 * MPObject to  {@code Map<String,String>}
+	 * TObject to  {@code Map<String,String>}
 	 * @param from
 	 * @param map
 	 */
@@ -160,11 +160,11 @@ public final class Utils {
 	}
 	
 	/**
-	 * list to MPArray
+	 * list to TArray
 	 * @param list
 	 * @return
 	 */
-	public static final ITArray toMpArray(List<Integer> list) {
+	public static final ITArray toTArray(List<Integer> list) {
 		ITArray result = new TArray();
 		for (Integer card : list) {
 			result.addInt(card);

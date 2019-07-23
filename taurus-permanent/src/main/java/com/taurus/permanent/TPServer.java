@@ -35,7 +35,7 @@ import com.taurus.permanent.util.GhostUserHunter;
  * @author daixiwei daixiwei15@126.com
  *
  */
-public final class TaurusPermanent {
+public final class TPServer {
 	/**
 	 * The server version.
 	 */
@@ -43,7 +43,7 @@ public final class TaurusPermanent {
 	/**
 	 * The server class instance.
 	 */
-	private static TaurusPermanent		_instance	= null;
+	private static TPServer				_instance	= null;
 	private final BitSwarmEngine		bitSwarmEngine;
 	private final Logger				log;
 	private volatile ServerState		state		= ServerState.STARTING;
@@ -63,14 +63,14 @@ public final class TaurusPermanent {
 	/**
 	 * get main instance
 	 */
-	public static TaurusPermanent getInstance() {
+	public static TPServer me() {
 		if (_instance == null) {
-			_instance = new TaurusPermanent();
+			_instance = new TPServer();
 		}
 		return _instance;
 	}
 
-	private TaurusPermanent() {
+	private TPServer() {
 		bitSwarmEngine = BitSwarmEngine.getInstance();
 
 		networkEvtListener = new NetworkEvtListener();
@@ -91,9 +91,8 @@ public final class TaurusPermanent {
 	}
 
 	public void start() {
-		System.out.println("\n==============================================================================\n" + 
-						">>Begin start taurus-permanent server....\n"
-						+ "============================================================================== \n");
+		System.out.println("\n==============================================================================\n" + ">>Begin start taurus-permanent server....\n"
+				+ "============================================================================== \n");
 		if (!initialized) {
 			initialize();
 		}
@@ -115,18 +114,16 @@ public final class TaurusPermanent {
 			timerPool.setCorePoolSize(config.timerThreadPoolSize);
 			bitSwarmEngine.init(null);
 
-			log.info("\n\n==============================================================================\n" + 
-					">>Init Extension...\n"
+			log.info("\n\n==============================================================================\n" + ">>Init Extension...\n"
 					+ "============================================================================== \n");
 			controller = new SystemController();
 			ghostUserHunter = new GhostUserHunter();
 			extension = instanceExtension();
 			controller.init(null);
 			extension.onStart();
-			
+
 			state = ServerState.STARTED;
-			log.info("\n\n==============================================================================\n" + 
-					">>Server(" + version + ") ready!\n"
+			log.info("\n\n==============================================================================\n" + ">>Server(" + version + ") ready!\n"
 					+ "============================================================================== \n");
 
 			serverStartTime = System.currentTimeMillis();
@@ -139,12 +136,12 @@ public final class TaurusPermanent {
 
 	private void initExecutors() {
 		final ExecutorConfig sys_cfg = this.config.systemThreadPoolConfig;
-		this.systemExecutor = new ThreadPoolExecutor(sys_cfg.corePoolSize, sys_cfg.maxPoolSize, sys_cfg.keepAliveTime, 
-				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(sys_cfg.maxQueueSize) , new TPThreadFactory(sys_cfg.name));
+		this.systemExecutor = new ThreadPoolExecutor(sys_cfg.corePoolSize, sys_cfg.maxPoolSize, sys_cfg.keepAliveTime, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(sys_cfg.maxQueueSize), new TPThreadFactory(sys_cfg.name));
 
 		final ExecutorConfig ext_cfg = this.config.extensionThreadPoolConfig;
-		this.extensionExecutor = new ThreadPoolExecutor(ext_cfg.corePoolSize, ext_cfg.maxPoolSize, ext_cfg.keepAliveTime, 
-				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(ext_cfg.maxQueueSize) , new TPThreadFactory(ext_cfg.name));
+		this.extensionExecutor = new ThreadPoolExecutor(ext_cfg.corePoolSize, ext_cfg.maxPoolSize, ext_cfg.keepAliveTime, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(ext_cfg.maxQueueSize), new TPThreadFactory(ext_cfg.name));
 	}
 
 	/**
@@ -287,7 +284,7 @@ public final class TaurusPermanent {
 			}
 		}
 	}
-	
+
 	private static final class TPThreadFactory implements ThreadFactory {
 		private static final AtomicInteger	POOL_ID;
 		private static final String			THREAD_BASE_NAME	= "%s:%s";

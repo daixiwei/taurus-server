@@ -1,7 +1,7 @@
 package com.taurus.permanent.util;
 
 import com.taurus.core.util.Logger;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.core.SessionManager;
 import com.taurus.permanent.core.SystemController;
 import com.taurus.permanent.data.Session;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class GhostUserHunter {
 	private static final String		EOL				= System.getProperty("line.separator");
-	private final TaurusPermanent	taurus;
+	private final TPServer	taurus;
 	private SessionManager			sm;
 	private SystemController				controller;
 	private final Logger			log;
@@ -25,8 +25,8 @@ public class GhostUserHunter {
 	private int						cycleCounter	= 0;
 
 	public GhostUserHunter() {
-		taurus = TaurusPermanent.getInstance();
-		this.controller = TaurusPermanent.getInstance().getController();
+		taurus = TPServer.me();
+		this.controller = TPServer.me().getController();
 		log = Logger.getLogger(getClass());
 	}
 

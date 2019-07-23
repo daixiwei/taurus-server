@@ -3,6 +3,7 @@ package com.taurus.permanent.core;
 import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.routes.IController;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
 
@@ -14,7 +15,7 @@ import com.taurus.permanent.data.Session;
 public abstract class Controller implements IController{
 	private String actionKey;
 	private Session session;
-	private int gid;
+	protected int gid;
 	private ITObject param;
 	private volatile boolean isFinish;
 	
@@ -61,17 +62,6 @@ public abstract class Controller implements IController{
 			throw new RuntimeException("This response is finish!");
 		}
 		isFinish = true;
-		if(!session.isConnected())return;
-		ITObject resObj = TObject.newInstance();
-		resObj.putInt(SystemController.REQUEST_RESULT, result);
-		resObj.putInt(SystemController.REQUEST_GID, gid);
-		if (params != null) {
-			resObj.putTObject(SystemController.REQUEST_PARM, params);
-		}
-		Packet packet = new Packet();
-		packet.setId(SystemController.ACTION_REQUST_CMD);
-		packet.setData(resObj);
-		packet.setRecipient(session);
-		BitSwarmEngine.getInstance().write(packet);
+		TPServer.me().getController().sendResponse(gid, result, params, session);
 	}
 }

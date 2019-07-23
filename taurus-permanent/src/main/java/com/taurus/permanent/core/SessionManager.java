@@ -13,7 +13,7 @@ import com.taurus.core.util.Logger;
 import com.taurus.core.util.task.ITaskHandler;
 import com.taurus.core.util.task.Task;
 import com.taurus.core.util.task.TaskScheduler;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.data.IPacketQueue;
 import com.taurus.permanent.data.ISocketChannel;
 import com.taurus.permanent.data.NonBlockingPacketQueue;
@@ -55,7 +55,7 @@ public final class SessionManager extends AbstractService {
 		engine = BitSwarmEngine.getInstance();
 		logger = Logger.getLogger(SessionManager.class);
 		
-		systemScheduler = TaurusPermanent.getInstance().getTaskScheduler();
+		systemScheduler = TPServer.me().getTaskScheduler();
 		sessionCleanTask = new Task(SESSION_CLEANING_TASK_ID);
 		systemScheduler.addScheduledTask(sessionCleanTask, SESSION_CLEANING_INTERVAL_SECONDS, true, new SessionCleaner());
 
