@@ -7,7 +7,7 @@ import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.ServerConfig;
@@ -49,7 +49,7 @@ public class WebSocketService extends BaseCoreService{
 	public void init(Object o) {
 		super.init(o);
 		WSConnectionListener listener = new WSConnectionListener(this);
-		ServerConfig config = TaurusPermanent.getInstance().getConfig();
+		ServerConfig config = TPServer.me().getConfig();
 		server = Undertow.builder().addHttpListener(config.webSocketConfig.port, config.webSocketConfig.address)
 				.setHandler(Handlers.path().addPrefixPath("/websocket", Handlers.websocket(listener)))
 				.build();
@@ -111,7 +111,7 @@ public class WebSocketService extends BaseCoreService{
 		if (packet.getRecipients().size() > 0) {
 			packet.setDataType(PackDataType.BINARY);
 			engine.getProtocolHandler().onPacketWrite(packet);
-			int protocolCompressionThreshold = TaurusPermanent.getInstance().getConfig().protocolCompression;
+			int protocolCompressionThreshold = TPServer.me().getConfig().protocolCompression;
 			byte[] binData = ((TObject)packet.getData()).toBinary();
 			boolean compression = binData.length > protocolCompressionThreshold;
 			if(compression) {

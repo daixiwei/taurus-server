@@ -12,7 +12,7 @@ import com.taurus.core.events.IEventListener;
 import com.taurus.core.service.IService;
 import com.taurus.core.util.FixedIndexThreadPool;
 import com.taurus.core.util.Logger;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.core.ServerConfig.SocketAddress;
 import com.taurus.permanent.data.BindableSocket;
 import com.taurus.permanent.data.Packet;
@@ -60,7 +60,7 @@ public final class BitSwarmEngine extends BaseCoreService {
 	
 	private void initializeServerEngine() {
 		logger = Logger.getLogger(BitSwarmEngine.class);
-		this.config = TaurusPermanent.getInstance().getConfig();
+		this.config = TPServer.me().getConfig();
 		inited = true;
 	}
 	
@@ -88,7 +88,10 @@ public final class BitSwarmEngine extends BaseCoreService {
 		this.connectionFilter.setMaxConnectionsPerIp(config.ipFilter.maxConnectionsPerAddress);
 	}
 	
-	
+	/**
+	 * write response packet. no blocking
+	 * @param response
+	 */
 	public void write(Packet response) {
 		try {
 			if (this.config.webSocketConfig.isActive) {

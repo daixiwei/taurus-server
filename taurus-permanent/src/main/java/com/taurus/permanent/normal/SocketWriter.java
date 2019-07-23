@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.core.BaseCoreService;
 import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.core.DefaultConstants;
@@ -109,7 +109,7 @@ public final class SocketWriter extends BaseCoreService implements Runnable {
 	public void run() {
 		Thread.currentThread().setName("SocketWriter-" + threadId++);
 		
-		ServerConfig setting = TaurusPermanent.getInstance().getConfig();
+		ServerConfig setting = TPServer.me().getConfig();
 		ByteBuffer writeBuffer = Utils.allocateBuffer(setting.maxWriteBufferSize, setting.writeBufferType);
 		
 		while (isActive) {

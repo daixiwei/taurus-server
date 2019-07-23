@@ -7,7 +7,7 @@ import com.taurus.core.entity.ITObject;
 import com.taurus.core.entity.TObject;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.Utils;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.core.BitSwarmEngine;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
@@ -41,7 +41,7 @@ public class BinaryIoHandler {
 
 	public void handleWrite(Packet packet) throws Exception {
 		engine.getProtocolHandler().onPacketWrite(packet);
-		int protocolCompressionThreshold = TaurusPermanent.getInstance().getConfig().protocolCompression;
+		int protocolCompressionThreshold = TPServer.me().getConfig().protocolCompression;
 		byte[] binData = ((TObject)packet.getData()).toBinary();
 		boolean compression = binData.length > protocolCompressionThreshold;
 		if(compression) {
@@ -224,7 +224,7 @@ public class BinaryIoHandler {
 		}
 
 		if (dataSize > this.maxPacketSize) {
-			TaurusPermanent.getInstance().getController().disconnect(session);
+			TPServer.me().getController().disconnect(session);
 			this.droppedIncomingPackets += 1L;
 
 			throw new IllegalArgumentException(String.format("Incoming request size too large: %s, Current limit: %s, From: %s", dataSize, this.maxPacketSize, who));

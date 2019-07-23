@@ -17,7 +17,7 @@ import com.taurus.core.service.IService;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.MD5;
 import com.taurus.core.util.Utils;
-import com.taurus.permanent.TaurusPermanent;
+import com.taurus.permanent.TPServer;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
 
@@ -56,7 +56,7 @@ public class SystemController implements IService {
 	private ThreadPoolExecutor		threadPool;
 
 	private final Logger			logger;
-	private final TaurusPermanent	taurus;
+	private final TPServer	taurus;
 
 	private SessionManager			sessionManager;
 	private ActionMapping			actionMapping;
@@ -64,7 +64,7 @@ public class SystemController implements IService {
 
 	public SystemController() {
 		logger = Logger.getLogger(SystemController.class);
-		taurus = TaurusPermanent.getInstance();
+		taurus = TPServer.me();
 		sessionManager = taurus.getSessionManager();
 		routes = new Routes() {
 			public void config() {
@@ -220,6 +220,7 @@ public class SystemController implements IService {
 	 * @param recipient 客户端session
 	 */
 	public void sendEvent(String actionKey, ITObject params, Session recipient) {
+		if(!recipient.isConnected())return;
 		List<Session> msgRecipients = new ArrayList<Session>();
 		msgRecipients.add(recipient);
 		sendEvent(actionKey, params, msgRecipients);
@@ -245,6 +246,30 @@ public class SystemController implements IService {
 		BitSwarmEngine.getInstance().write(packet);
 	}
 
+	/**
+	 * 动态响应客户端请示
+	 * 
+	 * @param gid
+	 * @param result 响应结果 0成功
+	 * @param params 数据参数
+	 * @param recipient 客户端session
+	 */
+	public void sendResponse(int gid,int result, ITObject params, Session recipient) {
+		if(gid==0)return;
+		if(!recipient.isConnected())return;
+		ITObject resObj = TObject.newInstance();
+		resObj.putInt(SystemController.REQUEST_RESULT, result);
+		resObj.putInt(SystemController.REQUEST_GID, gid);
+		if (params != null) {
+			resObj.putTObject(SystemController.REQUEST_PARM, params);
+		}
+		Packet packet = new Packet();
+		packet.setId(SystemController.ACTION_REQUST_CMD);
+		packet.setData(resObj);
+		packet.setRecipient(recipient);
+		BitSwarmEngine.getInstance().write(packet);
+	}
+	
 	public final Logger getLogger() {
 		return logger;
 	}
