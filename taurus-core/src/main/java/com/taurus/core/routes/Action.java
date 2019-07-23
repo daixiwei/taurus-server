@@ -54,4 +54,9 @@ public class Action {
 	public ActionKey getActionKeyObj() {
 		return actionKeyObj;
 	}
+	
+	@Override
+	public String toString() {
+		return actionKey;
+	}
 }

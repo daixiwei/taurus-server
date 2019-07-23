@@ -45,11 +45,6 @@
 		
 	    <databases>
 			<db>
-				<!-- <name>db1</name>
-				<driverName>com.mysql.jdbc.Driver</driverName>
-			    <connectionString>jdbc:mysql://rm-wz9k320fwmcahk83vgo.mysql.rds.aliyuncs.com:3306/db_haoyou</connectionString>
-			    <userName>root</userName>
-		    	<password>haoyou7!</password> -->
 		    	<name>db1</name>
 				<driverName>com.mysql.jdbc.Driver</driverName>
 			    <connectionString>jdbc:mysql://127.0.0.1:3306/db_haoyou</connectionString>
