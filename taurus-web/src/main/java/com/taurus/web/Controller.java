@@ -48,7 +48,11 @@ public abstract class Controller implements IController{
 	public String getSession() {
 		return session;
 	}
-
+	
+	public void setSession(String session) {
+		this.session = session;
+	}
+	
 	/**
 	 * 获取参数
 	 * @return

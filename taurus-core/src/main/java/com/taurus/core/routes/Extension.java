@@ -32,6 +32,14 @@ public abstract class Extension {
 	}
 	
 	/**
+	 * read ver
+	 * @return
+	 */
+	public int readVersion() {
+		return 0;
+	}
+	
+	/**
 	 * get extension name
 	 * @return
 	 */

@@ -209,7 +209,7 @@ public class Db {
 	 * @return
 	 * @throws SQLException
 	 */
-	public ITArray executeQueryByMPArray(String sql) throws SQLException{
+	public ITArray executeQueryByTArray(String sql) throws SQLException{
 		Connection conn = null;
 		PreparedStatement stmt =null;
 		ResultSet rset = null;

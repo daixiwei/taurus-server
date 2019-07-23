@@ -131,7 +131,7 @@ public class Test {
 			String sql = "select * from test";
 			long time = System.currentTimeMillis();
 			for(int i=0;i<2000;++i) {
-				DataBase.use().executeQueryByMPArray(sql);
+				DataBase.use().executeQueryByTArray(sql);
 			}
 			System.out.println("use time:"+(System.currentTimeMillis() - time));
 		} catch (Exception e) {
