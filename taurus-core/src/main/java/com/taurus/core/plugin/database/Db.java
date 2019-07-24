@@ -625,7 +625,17 @@ public class Db {
 			}
 		}
 		String sql = String.format("{call %s(%s)}", prepareName,valuesql);
-		
+		return executeCall(sql,resultSet);
+	}
+	
+	/**
+	 * 存储过程调用 
+	 * @param sql
+	 * @param resultSet
+	 * @return
+	 * @throws SQLException
+	 */
+	public ITArray executeCall(String sql,boolean resultSet) throws SQLException{
 		Connection conn = null;
 		CallableStatement stmt =null;
 		ResultSet rset = null;
@@ -654,7 +664,6 @@ public class Db {
 			}
 		}
 	}
-	
 	
 	
 	/**
