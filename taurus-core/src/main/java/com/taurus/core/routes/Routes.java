@@ -122,6 +122,7 @@ public abstract class Routes {
 			
 			this.controllerKey = processControllerKey(controllerKey,addSlash);
 			this.controller = controller;
+			this.ctrClass = controller.getClass();
 		}
 		
 		private String processControllerKey(String controllerKey,boolean addSlash) {

@@ -230,6 +230,7 @@ public final class SessionManager extends AbstractService {
 		session.setType(type);
 		IPacketQueue packetQueue = new NonBlockingPacketQueue(engine.getConfig().sessionPacketQueueSize);
 		session.setPacketQueue(packetQueue);
+		logger.info(session.toString());
 		return session;
 	}
 

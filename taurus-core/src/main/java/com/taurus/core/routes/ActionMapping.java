@@ -39,7 +39,7 @@ public class ActionMapping {
 			for (Route route : routes.getRouteItemList()) {
 				Class<? extends IController> controllerClass = route.getControllerClass();
 				
-				Method[] methods = controllerClass.getDeclaredMethods();
+				Method[] methods = controllerClass.getMethods();
 				for (Method method : methods) {
 					String methodName = method.getName();
 					if (!Modifier.isPublic(method.getModifiers()))

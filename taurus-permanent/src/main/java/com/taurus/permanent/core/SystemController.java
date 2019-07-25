@@ -181,11 +181,10 @@ public class SystemController implements IService {
 		if (parm.containsKey(REQUEST_PARM)) {
 			p = parm.getTObject(REQUEST_PARM);
 		}
-		((Controller)controller)._init(key, sender, gid, p);
 		if (action.getInterceptor() != null) {
-			action.getInterceptor().intercept(action, controller);
+			action.getInterceptor().intercept(action, controller,sender,p,gid);
 		} else {
-			action.getMethod().invoke(controller);
+			action.getMethod().invoke(controller,sender,p,gid);
 		}
 
 	}

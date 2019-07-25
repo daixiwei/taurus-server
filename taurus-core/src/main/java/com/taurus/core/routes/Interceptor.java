@@ -6,5 +6,5 @@ package com.taurus.core.routes;
  *
  */
 public interface Interceptor {
-	void intercept(Action action,IController controller) throws Exception;
+	void intercept(Action action,IController controller,Object... args) throws Exception;
 }
