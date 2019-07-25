@@ -86,8 +86,8 @@
 		</poolConfig>
 		
 		<infos>
-			<info name="group1_db0" host="127.0.0.1" password="123456" port="6379" database="0" />
-			<info name="group1_db1" host="127.0.0.1" password="123456" port="6379" database="1" />
+			<info name="db0" host="127.0.0.1" password="123456" port="6379" database="0" />
+			<info name="db1" host="127.0.0.1" password="123456" port="6379" database="1" />
 			<info name="group1_db2" host="127.0.0.1" password="123456" port="6379" database="2" />
 		</infos>
 	</plugin>  

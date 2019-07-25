@@ -37,7 +37,7 @@ public class ActionMapping {
 		mapping.clear();
 		for (Routes routes : getRoutesList()) {
 			for (Route route : routes.getRouteItemList()) {
-				Class<? extends IController> controllerClass = route.getController();
+				Class<? extends IController> controllerClass = route.getControllerClass();
 				
 				Method[] methods = controllerClass.getDeclaredMethods();
 				for (Method method : methods) {
@@ -51,7 +51,8 @@ public class ActionMapping {
 					if (StringUtil.isEmpty(actionKey))
 						throw new IllegalArgumentException(controllerClass.getName() + "." + methodName + "(): The argument of ActionKey can not be blank.");
 					Interceptor interceptor = ak.validate() > 0 ?routes.getInterceptor():null;
-					Action action = new Action(controllerKey, actionKey, route.getController(), method, methodName,interceptor,ak);
+					Action action = new Action(controllerKey, actionKey, route.getControllerClass(),
+							route.getController(),method, methodName,interceptor,ak);
 					
 					actionKey =controllerKey.equals(SLASH) ? SLASH+ actionKey : (controllerKey + SLASH+actionKey);
 					if (mapping.put(actionKey, action) != null) {

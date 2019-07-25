@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
  */
 public class Action {
 	private final Class<? extends IController> controllerClass;
+	private final IController controller;
 	private final String controllerKey;
 	private final String actionKey;
 	private final Method method;
@@ -16,10 +17,11 @@ public class Action {
 	private final Interceptor interceptor;
 	private final ActionKey actionKeyObj;
 	
-	public Action(String controllerKey, String actionKey, Class<? extends IController> controller, Method method, String methodName,Interceptor interceptor,ActionKey actionKeyObj) {
+	public Action(String controllerKey, String actionKey, Class<? extends IController> ctrClass,IController controller, Method method, String methodName,Interceptor interceptor,ActionKey actionKeyObj) {
 		this.controllerKey = controllerKey;
+		this.controller = controller;
 		this.actionKey = actionKey;
-		this.controllerClass = controller;
+		this.controllerClass = ctrClass;
 		this.method = method;
 		this.methodName = methodName;
 		this.interceptor = interceptor;
@@ -28,6 +30,10 @@ public class Action {
 	
 	public Class<? extends IController> getControllerClass() {
 		return controllerClass;
+	}
+	
+	public IController getController() {
+		return controller;
 	}
 	
 	public String getControllerKey() {

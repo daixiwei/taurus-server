@@ -66,7 +66,7 @@ public class SystemController implements IService {
 		logger = Logger.getLogger(SystemController.class);
 		taurus = TPServer.me();
 		sessionManager = taurus.getSessionManager();
-		routes = new Routes() {
+		routes = new Routes(Routes.CONTROLLER_INSTANCE) {
 			public void config() {
 			}
 		};
@@ -169,8 +169,11 @@ public class SystemController implements IService {
 		if (action == null) {
 			return;
 		}
-
-		IController controller = action.getControllerClass().newInstance();
+		
+		IController controller = action.getController();
+		if(controller == null) {
+			controller = action.getControllerClass().newInstance();
+		}
 		int gid = 0;
 		if (parm.containsKey(REQUEST_GID))
 			gid = parm.getInt(REQUEST_GID);

@@ -59,7 +59,7 @@ public class WebFilter implements Filter {
 			log = Logger.getLogger(WebFilter.class);
 			String contextPath = filterConfig.getServletContext().getContextPath();
 			contextPathLength = StringUtil.isNotEmpty(contextPath) ? contextPath.length() : 0;
-			Routes routes = new Routes() {
+			Routes routes = new Routes(Routes.CONTROLLER_CLASS) {
 				public void config() {
 				}
 			};
@@ -151,10 +151,10 @@ public class WebFilter implements Filter {
 					session = obj.getString(_Session);
 				}
 				ITObject params = obj.getTObject(WebUtils._Param);
-				IController controller = null;
+				Controller controller = null;
 				try {
-					controller = action.getControllerClass().newInstance();
-					((Controller) controller)._init(request, response, action.getActionKey(), session, params);
+					controller = (Controller)action.getControllerClass().newInstance();
+					controller._init(request, response, action.getActionKey(), session, params);
 	
 					if (action.getInterceptor() != null) {
 						action.getInterceptor().intercept(action, controller);
