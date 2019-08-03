@@ -21,7 +21,6 @@ import com.taurus.core.plugin.PluginService;
 import com.taurus.core.routes.Action;
 import com.taurus.core.routes.ActionMapping;
 import com.taurus.core.routes.Extension;
-import com.taurus.core.routes.IController;
 import com.taurus.core.routes.Routes;
 import com.taurus.core.util.Logger;
 import com.taurus.core.util.StringUtil;

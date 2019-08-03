@@ -969,10 +969,10 @@ public class Cache {
 	public Long zadd(String key, Map<String, Double> scoreMembers) {
 		Jedis jedis = getJedis();
 		try {
-			Map<String, Double> para = new HashMap<String, Double>();
-			for (Entry<String, Double> e : scoreMembers.entrySet())
-				para.put(e.getKey(), e.getValue());	// valueToBytes is important
-			return jedis.zadd(key, para);
+//			Map<String, Double> para = new HashMap<String, Double>();
+//			for (Entry<String, Double> e : scoreMembers.entrySet())
+//				para.put(e.getKey(), e.getValue());	// valueToBytes is important
+			return jedis.zadd(key, scoreMembers);
 		}
 		finally {close(jedis);}
 	}
@@ -1190,6 +1190,9 @@ public class Cache {
 		return name;
 	}
 	
+	public JedisPool getJedisPool() {
+		return jedisPool;
+	}
 	// ---------
 	
 	public Jedis getJedis() {

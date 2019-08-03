@@ -60,6 +60,9 @@ public class Redis {
 		return cacheMap.get(cacheName);
 	}
 	
+	public static ConcurrentHashMap<String, Cache> getCacheMap() {
+		return cacheMap;
+	}
 }
 
 
