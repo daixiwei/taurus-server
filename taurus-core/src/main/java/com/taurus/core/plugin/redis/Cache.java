@@ -1,13 +1,10 @@
 package com.taurus.core.plugin.redis;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import com.taurus.core.util.StringUtil;
-
-import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

@@ -25,13 +25,11 @@
 			<artifactId>taurus-core</artifactId>
 		</dependency>
 		
-
-	
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-webapp -->
 		<dependency>
 		    <groupId>org.eclipse.jetty</groupId>
 		    <artifactId>jetty-webapp</artifactId>
-		    <version>9.4.14.v20181114</version>
+		    <version>8.2.0.v20160908</version>
 		    <scope>provided</scope>
 		</dependency>
 
