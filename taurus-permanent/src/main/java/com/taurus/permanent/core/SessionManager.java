@@ -85,7 +85,7 @@ public final class SessionManager extends AbstractService {
 		if (sessionList.size() > highestCCS) {
 			highestCCS = sessionList.size();
 		}
-//		logger.info("Session created: " + session);
+		logger.info("Session created: " + session);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public final class SessionManager extends AbstractService {
 			engine.getConnectionFilter().removeAddress(session.getAddress());
 		}
 
-//		logger.info("Session removed: " + session);
+		logger.info("Session removed: " + session);
 	}
 
 	/**
@@ -230,7 +230,6 @@ public final class SessionManager extends AbstractService {
 		session.setType(type);
 		IPacketQueue packetQueue = new NonBlockingPacketQueue(engine.getConfig().sessionPacketQueueSize);
 		session.setPacketQueue(packetQueue);
-		logger.info(session.toString());
 		return session;
 	}
 

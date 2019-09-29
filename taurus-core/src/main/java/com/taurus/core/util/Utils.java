@@ -126,6 +126,54 @@ public final class Utils {
 	}
 	
 	
+	/**
+	 * ITArray 深拷贝
+	 * @param from
+	 * @param to
+	 */
+	public static final void arrayCopyDeep(ITArray from, ITArray to) {
+		for (Iterator<TDataWrapper> it = from.iterator(); it.hasNext();) {
+			TDataWrapper value = (TDataWrapper) it.next();
+			if (value.getTypeId() == TDataType.TOBJECT) {
+				ITObject obj = TObject.newInstance();
+				to.addTObject(obj);
+				objectCopyDeep((ITObject) value.getObject(),obj);
+			} else if (value.getTypeId() == TDataType.TARRAY) {
+				ITArray arr = TArray.newInstance();
+				to.addTArray(arr);
+				arrayCopyDeep((ITArray) value.getObject(),arr);
+			} else {
+				TDataWrapper v = new TDataWrapper(value.getTypeId(), value.getObject());
+				to.add(v);
+			}
+		}
+	}
+	
+	/**
+	 * TObject 深拷贝
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	public static final void objectCopyDeep(ITObject from, ITObject to) {
+		for (Iterator<Entry<String, TDataWrapper>> it = from.iterator(); it.hasNext();) {
+			Entry<String, TDataWrapper> entry = it.next();
+			String key = (String) entry.getKey();
+			TDataWrapper value = (TDataWrapper) entry.getValue();
+			if (value.getTypeId() == TDataType.TOBJECT) {
+				ITObject obj = TObject.newInstance();
+				to.putTObject(key, obj);
+				objectCopyDeep((ITObject) value.getObject(),obj);
+			} else if (value.getTypeId() == TDataType.TARRAY) {
+				ITArray arr = TArray.newInstance();
+				to.putTArray(key, arr);
+				arrayCopyDeep((ITArray) value.getObject(),arr);
+			} else {
+				TDataWrapper v = new TDataWrapper(value.getTypeId(), value.getObject());
+				to.put(key, v);
+			}
+		}
+	}
 	
 	/**
 	 * TObject copy

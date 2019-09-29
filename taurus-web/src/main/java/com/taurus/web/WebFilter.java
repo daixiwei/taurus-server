@@ -168,7 +168,9 @@ public class WebFilter implements Filter {
 						controller.sendResponse(500, null);
 						log.error(targetException);
 					}
-				} catch (Exception e) {
+				}catch (WebException e) {
+					controller.sendResponse(e.getCode(), null);
+				}catch (Exception e) {
 					if (controller != null) {
 						controller.sendResponse(500, null);
 					}
