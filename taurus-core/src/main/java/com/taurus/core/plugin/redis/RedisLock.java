@@ -1,21 +1,27 @@
 package com.taurus.core.plugin.redis;
 
+import java.util.UUID;
+
 import redis.clients.jedis.Jedis;
 
 /**
  * RedisLock
  */
 public class RedisLock {
-	private static final String	LOCKED					= "0";
-	private static final long	DEFAULT_TIME_OUT		= 6000;
-	private static final int	EXPIRE					= 4000;
+	private static final long	DEFAULT_TIME_OUT		= 180000;
+	private static final int	EXPIRE					= 10000;
 	private static final String	LOCK_SUCCESS			= "OK";
 	private static final String	SET_IF_NOT_EXIST		= "NX";
 	private static final String	SET_WITH_EXPIRE_TIME	= "PX";
-
+	private static final String checkAndDelScript = "if redis.call('get', KEYS[1]) == ARGV[1] then " +
+            "return redis.call('del', KEYS[1]) " +
+            "else " +
+            "return 0 " +
+            "end";
+	
 	private Jedis				jedis;
 	private String				key;
-	private volatile boolean	locked					= false;
+	private String				lock_value;
 
 	/**
 	 * This creates a RedisLock
@@ -24,8 +30,9 @@ public class RedisLock {
 	 * @param jedis
 	 */
 	public RedisLock(String key, Jedis jedis) {
-		this.key = key + "$lock";
+		this.key = key + "{lock}";
 		this.jedis = jedis;
+		lock_value = UUID.randomUUID().toString()+Thread.currentThread().getId() + System.nanoTime();
 	}
 
 	/**
@@ -35,10 +42,9 @@ public class RedisLock {
 		long time = System.currentTimeMillis();
 		try {
 			while ((System.currentTimeMillis() - time) < DEFAULT_TIME_OUT) {
-				String result = jedis.set(key, LOCKED, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, EXPIRE);
+				String result = jedis.set(key, lock_value, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, EXPIRE);
 				if (LOCK_SUCCESS.equals(result)) {
-					this.locked = true;
-					return this.locked;
+					return true;
 				}
 				Thread.sleep(5);
 			}
@@ -60,9 +66,7 @@ public class RedisLock {
 	 */
 	public void unlock(boolean closeJedis) {
 		try {
-			if (this.locked) {
-				this.jedis.del(this.key);
-			}
+			jedis.eval(checkAndDelScript, 1, key, lock_value);
 		} finally {
 			if (closeJedis) {
 				this.jedis.close();
