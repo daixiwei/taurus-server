@@ -15,7 +15,6 @@ import com.taurus.core.util.StringUtil;
 
 /**
  * JettyServer is used to config and start jetty web server.
- * Jetty version 8.1.8
  */
 class JettyServer{
 	private static final int DEFAULT_PORT = 80;

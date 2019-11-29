@@ -35,11 +35,12 @@ public class StatusServlet extends HttpServlet{
 		if(StringUtil.isNotEmpty(tem)) {
 			is_info = Boolean.parseBoolean(tem);
 		}
-		str += "connect-num:"+WebFilter.concurrentList.size() + "<br>";
+		List<SessionInfo> concurrentList = TWebServer.me().getConcurrentList();
+		str += "connect-num:"+concurrentList.size() + "<br>";
 		if(is_info) {
 			List<SessionInfo> list = null;
-			synchronized (WebFilter.concurrentList) {
-				list = new ArrayList<>(WebFilter.concurrentList);
+			synchronized (concurrentList) {
+				list = new ArrayList<>(concurrentList);
 			}
 			int i= 0;
 			for(SessionInfo info : list) {
