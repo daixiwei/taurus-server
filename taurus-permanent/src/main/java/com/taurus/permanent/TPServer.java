@@ -39,7 +39,7 @@ public final class TPServer {
 	/**
 	 * The server version.
 	 */
-	private final String				version		= "1.0.0";
+	private final String				version		= "1.0.1";
 	/**
 	 * The server class instance.
 	 */

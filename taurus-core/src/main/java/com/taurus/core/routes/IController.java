@@ -2,13 +2,10 @@ package com.taurus.core.routes;
 
 
 /**
- * Controller
+ * Controller interface
  * @author daixiwei
  *
  */
 public interface IController {
-	
-	
-	
 	
 }

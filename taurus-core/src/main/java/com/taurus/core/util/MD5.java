@@ -4,8 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * md5	
- * @author daixiwei	daixiwei15@126.com
+ * md5
  */
 public final class MD5 {
 	private static MD5 _instance = new MD5();

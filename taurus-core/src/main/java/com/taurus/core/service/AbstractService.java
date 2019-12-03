@@ -4,13 +4,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * AbstractService
+ * 
  * @author daixiwei daixiwei15@126.com
  */
 public abstract class AbstractService implements IService {
-	private static final AtomicInteger serviceId = new AtomicInteger(0);
-	private static final String DEFAULT_NAME = "Service-";
-	protected String name;
-	protected volatile boolean active = false;
+	private static final AtomicInteger	serviceId		= new AtomicInteger(0);
+	private static final String			DEFAULT_NAME	= "Service-";
+	protected String					name;
+	protected volatile boolean			active			= false;
 
 	public void init(Object o) {
 		name = getServiceId();

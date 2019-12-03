@@ -12,6 +12,10 @@ import java.io.InputStream;
  */
 public class FileUtil {
 
+	/**
+	 * delete file
+	 * @param file
+	 */
 	public static void delete(File file) {
 		if (file != null && file.exists()) {
 			if (file.isFile()) {
@@ -28,6 +32,11 @@ public class FileUtil {
 		}
 	}
 
+	/**
+	 * get file extension 
+	 * @param fileFullName
+	 * @return
+	 */
 	public static String getFileExtension(String fileFullName) {
 		if (StringUtil.isEmpty(fileFullName)) {
 			throw new RuntimeException("fileFullName is empty");
@@ -35,6 +44,11 @@ public class FileUtil {
 		return getFileExtension(new File(fileFullName));
 	}
 
+	/**
+	 * get file extension 
+	 * @param file
+	 * @return
+	 */
 	public static String getFileExtension(File file) {
 		if (null == file) {
 			throw new NullPointerException();
@@ -44,6 +58,12 @@ public class FileUtil {
 		return (dotIdx == -1) ? StringUtil.Empty : fileName.substring(dotIdx + 1);
 	}
 
+	/**
+	 * read utf text file
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
 	public static String readTxt(String path) throws Exception {
 		InputStream is = new FileInputStream(path);
 		byte[] bytes = new byte[is.available()];
@@ -53,6 +73,12 @@ public class FileUtil {
 		return str;
 	}
 	
+	/**
+	 * read binary file
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
 	public static byte[] readBytes(String path) throws Exception {
 		InputStream is = new FileInputStream(path);
 		byte[] bytes = new byte[is.available()];

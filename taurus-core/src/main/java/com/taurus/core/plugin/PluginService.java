@@ -113,13 +113,20 @@ public class PluginService {
 		}
 	}
 	
-	
+	/**
+	 * put plugin instance
+	 * @param plugin
+	 */
 	public final void putPlugin(IPlugin plugin) {
 		if(pluginMap.containsKey(plugin.getId()))return;
 		plugin.start();
 		pluginMap.put(plugin.getId(),plugin);
 	}
 	
+	/**
+	 * remove plugin
+	 * @param pluginId plugin key id
+	 */
 	public final void removePlugin(String pluginId) {
 		IPlugin plugin =pluginMap.remove(pluginId);
 		if(plugin!=null) {
@@ -127,6 +134,9 @@ public class PluginService {
 		}
 	}
 
+	/**
+	 *  stop all plugin
+	 */
 	public final void stop() {
 		Collection<IPlugin> list = pluginMap.values();
 		for(IPlugin plugin : list) {

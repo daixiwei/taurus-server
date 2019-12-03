@@ -2,17 +2,28 @@ package com.taurus.core.util;
 
 import java.util.Calendar;
 
+/**
+ * date util class
+ * @author daixiwei
+ *
+ */
 public class DateUtils {
 	
-	// 获取当天的开始时间
+	/**
+	 * 获取当天的开始时间
+	 * @param cal
+	 */
 	private static void setDayBegin(Calendar cal) {
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 	}
-
-	// 获取当天的结束时间
+	
+	/**
+	 * 获取当天的结束时间
+	 * @param cal
+	 */
 	private static void setDayEnd(Calendar cal) {
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.MINUTE, 59);
@@ -61,7 +72,6 @@ public class DateUtils {
 	public static int getEndLastDay() {
 		return getBeginDay()-1;
 	}
-
 
 	/**
 	 * 获取本周的开始时间

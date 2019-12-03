@@ -46,7 +46,7 @@ public class TDataSerializer {
 
 	public ITArray binary2array(byte[] data) {
 		if (data.length < 3) {
-			throw new IllegalStateException("Can't decode an Array. Byte data is insufficient. Size: " + data.length + " bytes");
+			throw new IllegalStateException("Can't decode an Array. Size: " + data.length + " bytes");
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(data.length);
 		buffer.put(data);
@@ -83,7 +83,7 @@ public class TDataSerializer {
 
 	public ITObject binary2object(byte[] data) {
 		if (data.length < 3) {
-			throw new IllegalStateException("Can't decode an Object. Byte data is insufficient. Size: " + data.length + " bytes");
+			throw new IllegalStateException("Can't decode an Object. Size: " + data.length + " bytes");
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(data.length);
 		buffer.put(data);

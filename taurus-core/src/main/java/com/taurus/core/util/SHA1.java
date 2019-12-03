@@ -4,8 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * sha1	
- * @author daixiwei	daixiwei15@126.com
+ * sha1
  */
 public final class SHA1 {
 	private static SHA1 _instance = new SHA1();
