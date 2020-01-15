@@ -46,6 +46,8 @@ public interface ITObject {
 	
 	public String getString(String key);
 	
+	public String getUtfString(String key);
+	
 	public byte[] getByteArray(String key);
 	
 	public ITArray getTArray(String key);
@@ -69,6 +71,8 @@ public interface ITObject {
 	public void putDouble(String key, double value);
 	
 	public void putString(String key, String value);
+	
+	public void putUtfString(String key, String value);
 	
 	public void putByteArray(String key, byte[] data);
 	

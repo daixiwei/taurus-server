@@ -510,7 +510,7 @@ public class TDataSerializer {
 	}
 
 	private TDataWrapper binDecode_STRING(ByteBuffer buffer) throws RuntimeException {
-		int strLen = buffer.getInt();
+		int strLen = buffer.getShort();
 		if (strLen < 0) {
 			throw new RuntimeException("Error decoding String. Negative size: " + strLen);
 		}
@@ -594,9 +594,9 @@ public class TDataSerializer {
 
 	private ByteBuffer binEncode_STRING(ByteBuffer buffer, String value) {
 		if (StringUtil.isEmpty(value)) {
-			ByteBuffer buf = ByteBuffer.allocate(5);
+			ByteBuffer buf = ByteBuffer.allocate(3);
 			buf.put((byte) TDataType.STRING.getTypeID());
-			buf.putInt(0);
+			buf.putShort((short)0);
 			return addData(buffer, buf.array());
 		}
 		byte[] stringBytes = null;
@@ -605,9 +605,9 @@ public class TDataSerializer {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		ByteBuffer buf = ByteBuffer.allocate(5 + stringBytes.length);
+		ByteBuffer buf = ByteBuffer.allocate(3 + stringBytes.length);
 		buf.put((byte) TDataType.STRING.getTypeID());
-		buf.putInt(stringBytes.length);
+		buf.putShort((short)stringBytes.length);
 		buf.put(stringBytes);
 		return addData(buffer, buf.array());
 	}

@@ -213,4 +213,14 @@ public class TArray implements ITArray {
 		TDataSerializer.me().flattenArray(list, this);
 		return list;
 	}
+
+	@Override
+	public void addUtfString(String value) {
+		this.addString(value);
+	}
+
+	@Override
+	public String getUtfString(int index) {
+		return getString(index);
+	}
 }

@@ -20,6 +20,7 @@ public class StringUtil {
 	 */
 	public static final String Empty = "";
 	
+	private static final String EMOJI_FILTER ="[\ud800\udc00-\udbff\udfff\ud800-\udfff]";
 	/**
 	 * 流数据转换为字符串  UTF-8
 	 * @param bytes
@@ -92,6 +93,20 @@ public class StringUtil {
 		return !isEmpty(str);
 	}
 
+	/**
+	  * 将emoji表情替换成空串
+	  *  
+	  * @param source
+	  * @return 过滤后的字符串
+	  */ 
+	public static String filterEmoji(String source) {
+		if (source != null && source.length() > 0) {
+			return source.replaceAll(EMOJI_FILTER, StringUtil.Empty);
+		} else {
+			return source;
+		}
+	}
+	
 	/**
 	 * 首字母大写
 	 * @param str

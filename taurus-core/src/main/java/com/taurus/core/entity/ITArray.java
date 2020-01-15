@@ -41,6 +41,8 @@ public interface ITArray {
 	
 	public void addString(String value);
 	
+	public void addUtfString(String value);
+	
 	public void addByteArray(byte[] data);
 	
 	public void addTArray(ITArray array);
@@ -68,6 +70,8 @@ public interface ITArray {
 	public Double getDouble(int index);
 	
 	public String getString(int index);
+	
+	public String getUtfString(int index);
 	
 	public byte[] getByteArray(int index);
 	

@@ -278,4 +278,14 @@ public class TObject implements ITObject {
 	public void del(String key) {
 		dataHolder.remove(key);
 	}
+
+	@Override
+	public String getUtfString(String key) {
+		return this.getString(key);
+	}
+
+	@Override
+	public void putUtfString(String key, String value) {
+		this.putUtfString(key, value);
+	}
 }
