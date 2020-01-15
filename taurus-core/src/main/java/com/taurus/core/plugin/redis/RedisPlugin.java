@@ -46,7 +46,8 @@ public class RedisPlugin implements IPlugin{
 		jedisPoolConfig.setBlockWhenExhausted(config.poolConfig.blockWhenExhausted);
 		
 		for (InfoConfig sis : config.infos) {
-			JedisPool jedisPool = new JedisPool(jedisPoolConfig, sis.host, sis.port, TIMEOUT, sis.password, sis.database);
+			String passwd = StringUtil.isEmpty(sis.password) ? null : sis.password;
+			JedisPool jedisPool = new JedisPool(jedisPoolConfig, sis.host, sis.port, TIMEOUT, passwd, sis.database);
 			Cache cache = new Cache(sis.name, jedisPool);
 			Redis.addCache(cache);
 		}
