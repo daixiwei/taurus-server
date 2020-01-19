@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 public @interface ActionKey {
 	String value();
 	
-	int validate() default 1;
+	int validate() default 0;
 	
 	/**参数{"a","1","b","2"}*/
 	String[] params() default {};

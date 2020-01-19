@@ -286,6 +286,6 @@ public class TObject implements ITObject {
 
 	@Override
 	public void putUtfString(String key, String value) {
-		this.putUtfString(key, value);
+		this.putString(key, value);
 	}
 }

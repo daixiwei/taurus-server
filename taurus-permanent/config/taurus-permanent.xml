@@ -2,7 +2,7 @@
 	<!-- 计时器线程池大小-->
 	<timerThreadPoolSize>4</timerThreadPoolSize>
 	<!-- 协议包压缩门槛 （单位字节），当协议包大于设定的值则会进行压缩 -->
-	<protocolCompression>512</protocolCompression>
+	<protocolCompression>100</protocolCompression>
 	<!-- 读缓冲区类型  nio  Direct Buffer  或者  Heap Buffer-->
 	<readBufferType>Heap</readBufferType>
 	<!-- 写入冲区类型  nio  Direct Buffer  或者  Heap Buffer-->

@@ -15,8 +15,6 @@ import com.taurus.core.routes.IController;
 import com.taurus.core.routes.Routes;
 import com.taurus.core.service.IService;
 import com.taurus.core.util.Logger;
-import com.taurus.core.util.MD5;
-import com.taurus.core.util.Utils;
 import com.taurus.permanent.TPServer;
 import com.taurus.permanent.data.Packet;
 import com.taurus.permanent.data.Session;
@@ -35,21 +33,17 @@ public class SystemController implements IService {
 	public static final String		REQUEST_RESULT				= "$r";
 
 	/**
-	 * 连接验证
-	 */
-	public static final int			ACTION_HANDSHAKE			= 0;
-	/**
 	 * pingpong
 	 */
-	public static final int			ACTION_PINGPONG				= 1;
+	public static final int			ACTION_PINGPONG				= 0;
 	/**
 	 * 客户端请求
 	 */
-	public static final int			ACTION_REQUST_CMD			= 2;
+	public static final int			ACTION_REQUST_CMD			= 1;
 	/**
 	 * 服务器事件消息
 	 */
-	public static final int			ACTION_EVENT_CMD			= 3;
+	public static final int			ACTION_EVENT_CMD			= 2;
 
 	private volatile boolean		active;
 	private String					name						= "SystemController";
@@ -120,15 +114,10 @@ public class SystemController implements IService {
 		byte reqId = (byte) packet.getId();
 
 		switch (reqId) {
-		case ACTION_HANDSHAKE:
-			onHandshake(sender);
-			break;
 		case ACTION_PINGPONG:
 			onPingPong(sender);
 			break;
 		case ACTION_REQUST_CMD:
-			if (sender.getHashId() == null)
-				return;
 			onRequest(sender, packet);
 			break;
 		}
@@ -141,26 +130,7 @@ public class SystemController implements IService {
 		packet.setData(new TObject());
 		BitSwarmEngine.getInstance().write(packet);
 	}
-
-	private static String __getUniqueSessionToken(final Session session) {
-		final String key = String.valueOf(session.getFullIpAddress()) + "__" + String.valueOf(Utils.rand.nextInt());
-		return MD5.getInstance().getHash(key);
-	}
-
-	private final void onHandshake(Session sender) {
-		ITObject parm = new TObject();
-		String token = __getUniqueSessionToken(sender);
-		parm.putString(CONNECT_TOKE, __getUniqueSessionToken(sender));
-		parm.putInt(CONNECT_PROT_COMPRESSION, taurus.getConfig().protocolCompression);
-		sender.setHashId(token);
-		sender.updateLastActivityTime();
-		Packet packet = new Packet();
-		packet.setId(ACTION_HANDSHAKE);
-		packet.setRecipient(sender);
-		packet.setData(parm);
-		BitSwarmEngine.getInstance().write(packet);
-	}
-
+	
 	private final void onRequest(Session sender, Packet packet) throws Exception {
 		ITObject parm = (ITObject) packet.getData();
 		String key = parm.getString(REQUEST_CMD);

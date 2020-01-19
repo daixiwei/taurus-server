@@ -113,7 +113,7 @@ public abstract class Routes {
 		}
 		
 		public Route(String controllerKey, IController controller,boolean addSlash) {
-			if (StringUtil.isEmpty(controllerKey)) {
+			if (controllerKey == null) {
 				throw new IllegalArgumentException("controllerKey can not be blank");
 			}
 			if (controller == null) {

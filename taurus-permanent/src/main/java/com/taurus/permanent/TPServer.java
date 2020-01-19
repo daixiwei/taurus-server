@@ -91,8 +91,9 @@ public final class TPServer {
 	}
 
 	public void start() {
-		System.out.println("\n==============================================================================\n" + ">>Begin start taurus-permanent server....\n"
-				+ "============================================================================== \n");
+		System.out.println("\n==============================================================================\n" + 
+							">>Begin start taurus-permanent server....\n"
+							+ "============================================================================== \n");
 		if (!initialized) {
 			initialize();
 		}
@@ -114,8 +115,9 @@ public final class TPServer {
 			timerPool.setCorePoolSize(config.timerThreadPoolSize);
 			bitSwarmEngine.init(null);
 
-			log.info("\n\n==============================================================================\n" + ">>Init Extension...\n"
-					+ "============================================================================== \n");
+			log.info("\n\n==============================================================================\n" + 
+						">>Init Extension...\n"+ 
+						"============================================================================== \n");
 			controller = new SystemController();
 			ghostUserHunter = new GhostUserHunter();
 			extension = instanceExtension();
@@ -123,7 +125,8 @@ public final class TPServer {
 			extension.onStart();
 
 			state = ServerState.STARTED;
-			log.info("\n\n==============================================================================\n" + ">>Server(" + version + ") ready!\n"
+			log.info("\n\n==============================================================================\n" + 
+						">>Server(" + version + ") ready!\n"
 					+ "============================================================================== \n");
 
 			serverStartTime = System.currentTimeMillis();
@@ -218,7 +221,6 @@ public final class TPServer {
 		if (initialized) {
 			throw new IllegalStateException("SmartFoxServer engine already initialized!");
 		}
-
 		bitSwarmEngine.addEventListener(TPEvents.SESSION_LOST, networkEvtListener);
 		bitSwarmEngine.addEventListener(TPEvents.SESSION_IDLE, networkEvtListener);
 		bitSwarmEngine.addEventListener(TPEvents.SESSION_IDLE_CHECK_COMPLETE, networkEvtListener);

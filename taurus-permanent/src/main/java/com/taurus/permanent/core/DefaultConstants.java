@@ -5,7 +5,7 @@ package com.taurus.permanent.core;
  * @author daixiwei daixiwei15@126.com
  */
 public final class DefaultConstants {
-	public static final String	SERVER_CFG_FILE							= "config/taurus-permanent.xml";
+	public static String	SERVER_CFG_FILE							= "config/taurus-permanent.xml";
 	
 	
 	public static final String	SERVICE_SOCKET_ACCEPTOR					= "socketAcceptor";
