@@ -210,4 +210,12 @@ public class TWebServer {
 	public List<SessionInfo> getConcurrentList(){
 		return concurrentList;
 	}
+	
+	public int getConcurrentSize() {
+		int size = concurrentList.size();
+		if(extension!=null) {
+			size +=extension.getConcurrentSize();
+		}
+		return size;
+	}
 }

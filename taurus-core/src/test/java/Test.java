@@ -3,6 +3,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,6 +15,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 import com.mysql.cj.util.Util;
+import com.sun.management.OperatingSystemMXBean;
 import com.taurus.core.entity.ITArray;
 import com.taurus.core.entity.TArray;
 import com.taurus.core.plugin.PluginService;
@@ -139,7 +141,12 @@ public class Test {
 			e.printStackTrace();
 		}
 	}
-	
+	private static OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+	public static int cpuLoad() {
+		double cpuLoad = osmxb.getSystemCpuLoad();
+		int percentCpuLoad = (int) (cpuLoad * 100);
+		return percentCpuLoad;
+	}
 	
 	public static void main(String[] args) {
 		try {
@@ -148,6 +155,26 @@ public class Test {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		new Thread(() -> {
+            while (true) {
+                long bac = 1000000;
+                bac = bac >> 1;
+            }
+        }).start();;
+
+        while (true) {
+            try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            System.out.println(cpuLoad());
+        }
+
+
+
 		
 //		find_test();
 //		for(int i =0;i<100;++i)

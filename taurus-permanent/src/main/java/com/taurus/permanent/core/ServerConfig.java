@@ -127,12 +127,12 @@ public class ServerConfig {
 		this.timerThreadPoolSize = Integer.parseInt(root.getChildTextTrim("timerThreadPoolSize"));
 		this.protocolCompression = Integer.parseInt(root.getChildTextTrim("protocolCompression"));
 		this.readBufferType = root.getChildTextTrim("readBufferType");
-		this.writeBufferType = root.getChildTextTrim("readBufferType");
+		this.writeBufferType = root.getChildTextTrim("writeBufferType");
 		this.maxPacketSize = Integer.parseInt(root.getChildTextTrim("maxPacketSize"));
 		this.maxReadBufferSize = Integer.parseInt(root.getChildTextTrim("maxReadBufferSize"));
 		this.maxWriteBufferSize = Integer.parseInt(root.getChildTextTrim("maxWriteBufferSize"));
 		this.socketAcceptorThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketAcceptorThreadPoolSize"));
-		this.socketReaderThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketWriterThreadPoolSize"));
+		this.socketReaderThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketReaderThreadPoolSize"));
 		this.socketWriterThreadPoolSize = Integer.parseInt(root.getChildTextTrim("socketWriterThreadPoolSize"));
 		this.maxPacketSize = Integer.parseInt(root.getChildTextTrim("maxPacketSize"));
 		this.sessionPacketQueueSize = Integer.parseInt(root.getChildTextTrim("sessionPacketQueueSize"));

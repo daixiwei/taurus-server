@@ -52,9 +52,38 @@ public class Logger {
 		logger = new Logger(log_class);
 		return logger;
 	}
+	
+	public static final Logger getLogger(String name) {
+		Logger logger = null;
+		if (_customClass != null) {
+			if (Logger.class.isAssignableFrom(_customClass)) {
+				try {
+					Constructor<?> c1 = _customClass.getDeclaredConstructor(new Class[] { Class.class });
+					c1.setAccessible(true);
+					logger = (Logger) c1.newInstance(name);
+					return logger;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		try {
+			Class.forName("org.apache.log4j.Logger");
+			logger = new Log4j(name);
+			return logger;
+		} catch (ClassNotFoundException e) {
+			// e.printStackTrace();
+		}
+		logger = new Logger(name);
+		return logger;
+	}
 
 	protected Logger(Class<?> log_class) {
 		_name = log_class == null ? ROOT_LOGGER_NAME : log_class.getSimpleName();
+	}
+	
+	protected Logger(String name) {
+		_name = name;
 	}
 
 	public String getName() {
@@ -154,6 +183,11 @@ public class Logger {
 		protected Log4j(Class<?> log_class) {
 			super(log_class);
 			logger = org.apache.log4j.Logger.getLogger(log_class);
+		}
+		
+		protected Log4j(String name) {
+			super(name);
+			logger = org.apache.log4j.Logger.getLogger(name);
 		}
 
 		@Override

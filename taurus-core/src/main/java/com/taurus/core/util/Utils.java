@@ -1,5 +1,6 @@
 package com.taurus.core.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -221,34 +222,20 @@ public final class Utils {
 	}
 	
 	/**
-	 * 压缩直接数组 
+	 * 压缩字节数组 
 	 * @param data
 	 * @return
 	 * @throws IOException
 	 */
     public static byte[] compress(byte[] data) throws IOException{  
-        byte[] output = new byte[0];  
-
-        Deflater compresser = new Deflater(Deflater.BEST_COMPRESSION,false);  
-        compresser.reset();  
-        compresser.setInput(data);  
-        compresser.finish();  
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);  
-        try {  
-            byte[] buf = new byte[1024];  
-            while (!compresser.finished()) {  
-                int i = compresser.deflate(buf);  
-                bos.write(buf, 0, i);  
-            }  
-            output = bos.toByteArray();  
-        } catch (Exception e) {  
-            output = data;  
-            e.printStackTrace();  
-        } finally {  
-            bos.close();  
-        }  
-        compresser.end();  
-        return output;  
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();  
+        try {
+        	compress(data,bos);
+        	byte[] output = bos.toByteArray();
+        	return output;
+        }finally {
+        	 bos.close();
+		}
     }  
 
     /**
@@ -284,28 +271,13 @@ public final class Utils {
      * @throws IOException
      */
     public static byte[] uncompress(byte[] data) throws IOException {  
-        byte[] output = new byte[0];  
-
-        Inflater decompresser = new Inflater(false);  
-        decompresser.reset();  
-        decompresser.setInput(data);  
-
-        ByteArrayOutputStream o = new ByteArrayOutputStream(data.length);  
-        try {  
-            byte[] buf = new byte[1024];  
-            while (!decompresser.finished()) {  
-                int i = decompresser.inflate(buf);  
-                o.write(buf, 0, i);  
-            }  
-            output = o.toByteArray();  
-        } catch (Exception e) {  
-            output = data;
-        } finally {  
-            o.close();  
-        }
-
-        decompresser.end();  
-        return output;  
+        ByteArrayInputStream bis = new ByteArrayInputStream(data);
+        try {
+        	byte[] output =uncompress(bis);
+        	return output;
+        }finally {
+        	bis.close();
+		}
     }  
 
     /**

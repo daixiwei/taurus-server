@@ -70,7 +70,7 @@ class JettyServer{
 			throw new IllegalStateException("port: " + port + " already in use!");
 		}
 		
-		System.out.println("Starting mpnet web server ");
+		System.out.println("Starting taurus web server ");
 		server = new Server(port);
 		webApp = new WebAppContext();
 		webApp.setThrowUnavailableOnStartupException(true);

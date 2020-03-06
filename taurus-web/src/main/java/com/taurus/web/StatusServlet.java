@@ -35,9 +35,10 @@ public class StatusServlet extends HttpServlet{
 		if(StringUtil.isNotEmpty(tem)) {
 			is_info = Boolean.parseBoolean(tem);
 		}
-		List<SessionInfo> concurrentList = TWebServer.me().getConcurrentList();
-		str += "connect-num:"+concurrentList.size() + "<br>";
+		int size = TWebServer.me().getConcurrentSize();
+		str += "connect-num:"+size + "<br>";
 		if(is_info) {
+			List<SessionInfo> concurrentList = TWebServer.me().getConcurrentList();
 			List<SessionInfo> list = null;
 			synchronized (concurrentList) {
 				list = new ArrayList<>(concurrentList);

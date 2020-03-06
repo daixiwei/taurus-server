@@ -46,4 +46,12 @@ public abstract class Extension {
 	public String getName() {
 		return this.name;
 	}
+	
+	/**
+	 * get conncurrent number
+	 * @return
+	 */
+	public int getConcurrentSize() {
+		return 0;
+	}
 }
